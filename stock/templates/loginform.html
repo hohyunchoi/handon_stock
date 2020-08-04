@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        {% load static %}
+        {% static "" as baseUrl %}
+        <title>HD주식 로그인</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="keywords" content="mobile portfolio, mobile portfolio site">
+        <meta name="author" content="kimsh">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <script src="{% static 'js/jquery-1.8.3.min.js'%}"></script>
+        <script src="{% static 'js/jquery.mobile-1.2.0.min.js'%}"></script>
+        <link href="{% static 'css/jquery.mobile.structure-1.2.0.min.css'%}" rel="stylesheet">
+        <link href="{% static 'css/jquery.mobile.theme-1.2.0.min.css'%}" rel="stylesheet">
+        <link href="{% static 'css/jquery.mobile-1.2.0.min.css'%}" rel="stylesheet">
+        <link href="{% static 'css/photoswipe.css'%}" rel="stylesheet">
+        <link href="{% static 'css/style.css'%}" rel="stylesheet">
+        <script src="{% static 'js/script.js'%}"></script>
+        <script src="{% static 'js/settings.js'%}"></script>
+        <script src="{% static 'js/klass.min.js'%}"></script>
+        <script src="{% static 'js/code.photoswipe.jquery-3.0.5.min.js'%}"></script>
+    </head>
+
+    <body>
+
+    <div data-role="page" id="home">
+            <div data-role="header">
+                <h1>HD주식</h1>
+            </div>
+            <div data-role="content">
+                <form method="post" action="login">
+                 {% csrf_token %}
+                    <table width="100%">
+                        <thead>
+                            <tr>
+                                <th colspan="2">로그인</th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr><th colspan="2"><input type="submit" value="로그인">
+                            <input type="button" value="회원가입" onclick=""></th></tr>
+
+                        </tfoot>
+                        <tbody>
+                            <tr>
+                                <th>아이디</th>
+                                <td><input type="email" name="email" id="email" maxlength="30" minlength="3"></td>
+                            </tr>
+                            <tr>
+                                <th>비밀번호</th>
+                                <td><input type="password" name="pw" id="pw" maxlength="20" minlength="3"></td>
+                            </tr>
+                            <tr>
+                                <td id="msg" colspan="2" style="color: red">{{msg}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+
+            </div>
+            <div data-role="footer">
+                <h2>HD금융</h2>
+                <p class="copyright">&copy; Copyright 2020</p>
+            </div>
+        </div>
+    </body>
+
+</html>
