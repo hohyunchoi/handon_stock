@@ -54,3 +54,9 @@ def getNaverStockData(**key):
 
 def stockchart(request):
     return render(request,"stockchart.html")
+
+def stockchartajax(request):
+    page = request.GET['page']
+    stockchart = getNaverStockData(page=1).to_html(index=False)
+    print(stockchart)
+    return render(request,"stockchartserver.html",{"stockchart":stockchart})

@@ -20,5 +20,7 @@ urlpatterns = [
     path('login', views.login, name="login"),
     path('home', views.home, name="home"),
     path("logout", views.logout, name="logout"),
-    path("account_ajax", views.account)
+    path("account_ajax", views.account),
+    path("stockchart",views.stockchart),
+    path("stockchart_ajax",views.stockchartajax),
 ]

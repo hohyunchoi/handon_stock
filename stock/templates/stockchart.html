@@ -1,10 +1,72 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<html>
 
-</body>
+    <head>
+        {% load static %}
+        {% static "" as baseUrl %}
+        <title>HD주식 로그인</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="keywords" content="mobile portfolio, mobile portfolio site">
+        <meta name="author" content="kimsh">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <script src="{% static 'js/jquery-1.8.3.min.js'%}"></script>
+        <script src="{% static 'js/jquery.mobile-1.2.0.min.js'%}"></script>
+        <link href="{% static 'css/jquery.mobile.structure-1.2.0.min.css'%}" rel="stylesheet">
+        <link href="{% static 'css/jquery.mobile.theme-1.2.0.min.css'%}" rel="stylesheet">
+        <link href="{% static 'css/jquery.mobile-1.2.0.min.css'%}" rel="stylesheet">
+        <link href="{% static 'css/photoswipe.css'%}" rel="stylesheet">
+        <link href="{% static 'css/style.css'%}" rel="stylesheet">
+        <link href="{% static 'css/table.css'%}" rel="stylesheet">
+        <script src="{% static 'js/script.js'%}"></script>
+        <script src="{% static 'js/settings.js'%}"></script>
+        <script src="{% static 'js/klass.min.js'%}"></script>
+        <script src="{% static 'js/code.photoswipe.jquery-3.0.5.min.js'%}"></script>
+    </head>
+
+    <body>
+
+    <div data-role="page" id="home">
+            <div data-role="header">
+                <h1>HD주식</h1>
+            </div>
+            <div data-role="content" id="content">
+
+
+            </div>
+            <div data-role="footer">
+                <h2>HD금융</h2>
+                <p class="copyright">&copy; Copyright 2020</p>
+            </div>
+        </div>
+<input type="hidden" id="page" value="{{page}}">
+    </body>
+<script>
+$(document).ready(function(){
+
+
+   var page = $('#page').val()
+   console.log(page)
+ if(page ==""){
+ page=1
+  console.log(page)
+
+ }
+  $.ajax({ url:'stockchart_ajax?page='+page,
+    success:function(data){
+        var result = data;
+        console.log(typeof(result))
+        var table = result.replace(/&lt;/gi,'<').replace(/&gt;/gi, '>').replace(/&quot;/gi, '\"')
+        console.log(table);
+        $("#content").html(table);
+
+     }
+     })
+
+
+})
+
+
+</script>
+
 </html>
