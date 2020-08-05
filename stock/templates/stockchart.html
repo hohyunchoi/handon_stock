@@ -49,7 +49,7 @@
 
 
             </div>
-        <div id="paging" style="text-align:center;">
+        <div id="paging" >
 
         </div>
             <div data-role="footer">
@@ -75,7 +75,7 @@ $(document).ready(function(){
   $.ajax({ url:'stockchart_ajax?page='+page+'&sosok='+sosok,
     success:function(data){
         var result = data;
-        var table = result.replace(/&lt;/gi,'<').replace(/&gt;/gi, '>').replace(/&quot;/gi, '\"').replace(/&amp;/gi,"&")
+        var table = result.replace(/&lt;/gi,'<').replace(/&gt;/gi, '>').replace(/&quot;/gi, '\"').replace(/&amp;/gi,"&").replace('border="1"',"")
         $("#content").html(table);
         $("table").attr("style","overflow-x:auto;")
         $('tbody > tr ').each(function(index,item){

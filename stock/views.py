@@ -49,8 +49,10 @@ def account(request):
 def getNaverStockData(**key):
     url = 'https://finance.naver.com/sise/sise_market_sum.nhn?sosok='+key['sosok']+'&page='+str(key["page"])
     result = pd.read_html(url, encoding="euc-kr")[1]
-    result = result.iloc[:,:-3].dropna().reset_index(drop=True)
+    result = result.iloc[:,:-8].dropna().reset_index(drop=True)
     result['N'] = result['N'].astype(int)
+    result['현재가'] = result['현재가'].astype(int)
+    result['전일비'] = result['전일비'].astype(int)
     return result
 
 def getPaging(**key):
