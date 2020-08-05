@@ -4,7 +4,8 @@ from stock import models
 from django.views.decorators.csrf import csrf_exempt
 from bs4 import BeautifulSoup as bs
 import pandas as pd
-
+from selenium import webdriver
+import requests as rq
 
 @csrf_exempt
 def login(request):
@@ -46,17 +47,92 @@ def account(request):
     return render(request, "account.html", {"account": accountmap})
 
 def getNaverStockData(**key):
-    url = 'https://finance.naver.com/sise/sise_market_sum.nhn?&page='+str(key["page"])
+    url = 'https://finance.naver.com/sise/sise_market_sum.nhn?sosok='+key['sosok']+'&page='+str(key["page"])
     result = pd.read_html(url, encoding="euc-kr")[1]
     result = result.iloc[:,:-3].dropna().reset_index(drop=True)
     result['N'] = result['N'].astype(int)
     return result
 
+def getPaging(**key):
+    url = 'https://finance.naver.com/sise/sise_market_sum.nhn'
+    site = rq.get(url)
+    site2 = site.content.decode('euc-kr')
+    soup = bs(site2, 'html.parser')
+    page = soup.select('.Nnavi')
+    return page
+
+def getlastpage(request,**key):
+    url = 'https://finance.naver.com/sise/sise_market_sum.nhn?sosok='+key['sosok']+'&page=100'
+    site = rq.get(url)
+    site2 = site.content.decode('euc-kr')
+    soup = bs(site2, 'html.parser')
+    lastpage = soup.select('td.on > a')[0].text
+    return int(lastpage)
+
 def stockchart(request):
-    return render(request,"stockchart.html")
+    page = request.GET['page']
+    sosok = request.GET['sosok']
+    return render(request,"stockchart.html",{"page":page,"sosok":sosok})
 
 def stockchartajax(request):
     page = request.GET['page']
-    stockchart = getNaverStockData(page=1).to_html(index=False)
-    print(stockchart)
+    sosok = request.GET['sosok']
+    print(sosok)
+    stockchart = getNaverStockData(page=page,sosok=sosok).to_html(index=False)
     return render(request,"stockchartserver.html",{"stockchart":stockchart})
+
+def pagingajax(request):
+    page = request.GET['page']
+    pages = getPaging(page=page)[0]
+    return render(request,"pagingserver.html",{"page":str(pages)})
+
+def paging(request):
+    page = int(request.GET['page'])
+    sosok = request.GET['sosok']
+    startpage= 0
+    endpage=0
+    lastpagev = int(getlastpage(request,sosok=sosok))
+    if (page-5)<1:
+        startpage = 1
+    else:
+        startpage = page -5
+        if startpage > (lastpagev-10):
+            startpage = lastpagev-10
+    if (page+5)>lastpagev:
+        endpage = lastpagev
+    else:
+        endpage = page+5
+        if endpage <10:
+            endpage = 10
+    pages = '<table><tr>'
+    if page != 1:
+        pages += '<td><a href="stockchart?sosok='+sosok+'&page=1"><<</td>'
+        if page <11:
+
+            pages += '<td><a href="stockchart?sosok='+sosok+'&page=1"><</td>'
+        else:
+            pages += '<td><a href="stockchart?sosok='+sosok+'&page='+str(page-10)+'"><</td>'
+    for i in range(startpage,endpage+1):
+        if i == page:
+            pages += '<td><strong>'+str(i)+'</strong>'
+        else:
+            pages += '<td><a href="stockchart?sosok='+sosok+'&page='+str(i)+'">'+str(i)+'</a></td>'
+    if page != lastpagev:
+
+        if page > lastpagev -10:
+            pages += '<td><a href="stockchart?sosok='+sosok+'&page='+str(lastpagev)+'">></td>'
+        else:
+            pages += '<td><a href="stockchart?sosok='+sosok+'&page='+str(page+10)+'">></td>'
+        pages += '<td><a href="stockchart?sosok='+sosok+'&page=' + str(lastpagev) + '">>></td>'
+    pages += '</tr></table>'
+    return render(request,"pagingserver.html",{"page":pages})
+
+
+def stockdetail(request):
+    name = request.GET['name']
+    df = pd.read_html('http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=13', header=0)[0]
+    code = str(df[df['회사명'] == name]['종목코드'].values[0])
+    code = code.zfill(6)
+
+
+    return render(request,"stockdetail.html",{"code":code})

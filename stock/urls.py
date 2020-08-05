@@ -23,4 +23,6 @@ urlpatterns = [
     path("account_ajax", views.account),
     path("stockchart",views.stockchart),
     path("stockchart_ajax",views.stockchartajax),
+    path("page_ajax",views.paging),
+    path("stockdetail",views.stockdetail),
 ]
