@@ -138,3 +138,40 @@ def stockdetail(request):
 
 
     return render(request,"stockdetail.html",{"code":code})
+
+def today(request):
+    code = request.GET['code']
+    url = 'https://finance.naver.com/item/main.nhn?code=207940'
+    site = rq.get(url)
+    site2 = site.content.decode('euc-kr')
+    soup = bs(site2, 'html.parser')
+    price = soup.select('.no_today .blind')[0].text
+    priceupdown = soup.select('.no_exday .blind')[0].text
+    priceper = soup.select('.no_exday .blind')[1].text
+    yesterday = soup.select('.no_info .blind')[0].text
+    pricemax = soup.select('.no_info .blind')[1].text
+    dill = soup.select('.no_info .blind')[3].text
+    pricesiga = soup.select('.no_info .blind')[4].text
+    pricemin = soup.select('.no_info .blind')[5].text
+    dillprice = soup.select('.no_info .blind')[6].text
+    updown = soup.select('.no_exday .ico')[0].text
+
+    if updown == '상승':
+        priceper = '+' + priceper + '%'
+        priceupdown = '▲' + priceupdown
+    else:
+        priceper = '-' + priceper + '%'
+        priceupdown = '▼' + priceupdown
+    print('가격', price)
+    print('전일대비', priceupdown)
+    print('변동퍼센트', priceper)
+    print('전일', yesterday)
+    print('고가', pricemax)
+    print('거래량', dill)
+    print('시가', pricesiga)
+    print('저가', pricemin)
+    print('변동', updown)
+    print('거래대금', dillprice)
+    chart = soup.select('#img_chart_area')[0]['src']
+    print(chart)
+    return render(request,"stocktodayserver.html",{"today":today})

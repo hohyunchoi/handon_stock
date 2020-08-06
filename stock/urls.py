@@ -25,4 +25,5 @@ urlpatterns = [
     path("stockchart_ajax",views.stockchartajax),
     path("page_ajax",views.paging),
     path("stockdetail",views.stockdetail),
+    path("stocktoday",views.today),
 ]
