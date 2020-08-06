@@ -197,8 +197,9 @@ def today(request):
     else:
         sigacolor = 'black'
     chart = soup.select('#img_chart_area')[0]['src']
+    date = soup.select('.date')[0].text
     return render(request,"stocktodayserver.html",{"price":price,"priceupdown":priceupdown,"priceper":priceper,"yesterday":yesterday,"pricemax":pricemax,
                                                    "dill":dill,"pricesiga":pricesiga,"pricemin":pricemin,"updown":updown,"dillprice":dillprice,
                                                    "chart":chart,'maxcolor':maxcolor,'mincolor':mincolor,'sigacolor':sigacolor,
-                                                   'color':color})
+                                                   'color':color,'date':date})
 
