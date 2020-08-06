@@ -174,4 +174,5 @@ def today(request):
     print('거래대금', dillprice)
     chart = soup.select('#img_chart_area')[0]['src']
     print(chart)
-    return render(request,"stocktodayserver.html",{"today":today})
+    return render(request,"stocktodayserver.html",{"price":price,"priceupdown":priceupdown,"priceper":priceper,"yesterday":yesterday,"pricemax":pricemax,
+                                                   "dill":dill,"pricesiga":pricesiga,"pricemin":pricemin,"updown":updown,"dillprice":dillprice})
