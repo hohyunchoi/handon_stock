@@ -27,28 +27,11 @@
 
     <div data-role="page" id="home">
             <div data-role="header">
-                <h1>HD주식</h1>
+                <h1>{{name}}</h1>
+                <p style="text-align:center; font-size:10px; margin-top:-10px;">{{code}}  {{sosok}}</p>
             </div>
 
             <div data-role="content" id="content" style="overflow-x:auto">
-                <div class="title">
-                    <div>
-                    <strong style="font-size:20">종목명</strong><br>
-                    전일대비<span>▲8000</span> <span>+10%</span>
-                    </div>
-                    <div CLASS="imgdiv">
-                        <img src="https://ssl.pstatic.net/imgfinance/chart/mobile/mini/005257_end_up_tablet.png?1596687541922">
-                    </div>
-                </div>
-                <ul class="total_lst">
-                    <li><div>전일</div> <span>111112</span></li>
-                    <li><div>시가</div> <span>111112</span></li>
-                    <li><div>저가</div> <span>111112</span></li>
-                    <li><div>고가</div> <span>111112</span></li>
-                    <li><div>거래량</div> <span>111112</span></li>
-                    <li><div>거래대금</div> <span>111112</span></li>
-                    <li><img src="https://ssl.pstatic.net/imgfinance/chart/mobile/candle/day/005257_end.png"></li>
-                </ul>
 
             </div>
 
@@ -61,7 +44,12 @@
     </body>
 <script>
 $(document).ready(function(){
-
+var code = $('#code').val()
+    $.ajax({ url:'stocktoday?code='+code,
+    success:function(data){
+        $('#content').html(data)
+        }
+    })
 
 
 

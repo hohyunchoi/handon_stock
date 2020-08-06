@@ -132,16 +132,20 @@ def paging(request):
 
 def stockdetail(request):
     name = request.GET['name']
+    sosok = request.GET['sosok']
     df = pd.read_html('http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=13', header=0)[0]
     code = str(df[df['회사명'] == name]['종목코드'].values[0])
     code = code.zfill(6)
-
-
-    return render(request,"stockdetail.html",{"code":code})
+    if sosok  == '0':
+        sosok = 'KOSPI'
+    else:
+        sosok = 'KOSDAK'
+    return render(request,"stockdetail.html",{"name":name,"code":code,'sosok':sosok})
 
 def today(request):
     code = request.GET['code']
-    url = 'https://finance.naver.com/item/main.nhn?code=207940'
+    url = 'https://finance.naver.com/item/main.nhn?code='+code
+    print(url)
     site = rq.get(url)
     site2 = site.content.decode('euc-kr')
     soup = bs(site2, 'html.parser')
@@ -155,24 +159,46 @@ def today(request):
     pricemin = soup.select('.no_info .blind')[5].text
     dillprice = soup.select('.no_info .blind')[6].text
     updown = soup.select('.no_exday .ico')[0].text
-
+    color = ''
     if updown == '상승':
         priceper = '+' + priceper + '%'
         priceupdown = '▲' + priceupdown
-    else:
+        color = 'red'
+    elif updown == '하락':
         priceper = '-' + priceper + '%'
+        color = 'blue'
         priceupdown = '▼' + priceupdown
-    print('가격', price)
-    print('전일대비', priceupdown)
-    print('변동퍼센트', priceper)
-    print('전일', yesterday)
-    print('고가', pricemax)
-    print('거래량', dill)
-    print('시가', pricesiga)
-    print('저가', pricemin)
-    print('변동', updown)
-    print('거래대금', dillprice)
+    else:
+        color = 'gary'
+
+    yesterdayint = int(''.join(yesterday.split(',')))
+    maxint = int(''.join(pricemax.split(',')))
+    minint = int(''.join(pricemin.split(',')))
+    sigaint = int(''.join(pricesiga.split(',')))
+    maxcolor = ''
+    if yesterdayint > maxint:
+        maxcolor = 'blue'
+    elif yesterdayint < maxint:
+        maxcolor = 'red'
+    else:
+        maxcolor = 'black'
+    mincolor = ''
+    if yesterdayint > minint:
+        mincolor = 'blue'
+    elif yesterdayint < minint:
+        mincolor = 'red'
+    else:
+        mincolor = 'black'
+    sigacolor = ''
+    if yesterdayint > sigaint:
+        sigacolor = 'blue'
+    elif yesterdayint < sigaint:
+        sigacolor = 'red'
+    else:
+        sigacolor = 'black'
     chart = soup.select('#img_chart_area')[0]['src']
-    print(chart)
     return render(request,"stocktodayserver.html",{"price":price,"priceupdown":priceupdown,"priceper":priceper,"yesterday":yesterday,"pricemax":pricemax,
-                                                   "dill":dill,"pricesiga":pricesiga,"pricemin":pricemin,"updown":updown,"dillprice":dillprice})
+                                                   "dill":dill,"pricesiga":pricesiga,"pricemin":pricemin,"updown":updown,"dillprice":dillprice,
+                                                   "chart":chart,'maxcolor':maxcolor,'mincolor':mincolor,'sigacolor':sigacolor,
+                                                   'color':color})
+

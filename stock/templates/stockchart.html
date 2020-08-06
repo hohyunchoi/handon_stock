@@ -62,7 +62,7 @@
 <script>
 $(document).ready(function(){
 
-   var sosok = $('#so').val()
+   var sosok = $('#sosok').val()
    if(sosok == ""){
    sosok='0'
    }
@@ -94,7 +94,7 @@ $(document).ready(function(){
         })
         $('#content > table > tbody > tr').on('click',function(){
         name = $(this).children('td:nth-child(2)').text()
-         location.href = 'stockdetail?name='+name
+         location.href = 'stockdetail?name='+name+'&sosok='+sosok
 })
 
 
