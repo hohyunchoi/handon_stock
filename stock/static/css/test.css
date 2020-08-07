@@ -1,0 +1,77 @@
+.step5_tbl .grp em {
+    position: absolute;
+    top: 0;
+    z-index: 20;
+    line-height: 25px;
+}
+
+em, address {
+    font-style: normal;
+}
+
+.step5_tbl .grp {
+    position: relative;
+    width: 100%;
+    height: 25px;
+    background-color: #ccc;
+    color: #fff;
+}
+
+@media (min-width: 768px)
+.step5_tbl td {
+    padding: 6px 0;
+    font-size: 16px;
+    font-family: Helvetica,AppleSDGothicNeo-Regular,sans-serif;
+}
+
+.step5_tbl td {
+    padding: 5px 0;
+    font-size: 15px;
+    text-align: center;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+@media (min-width: 768px)
+.step5_tbl .grp {
+    height: 26px;
+}
+
+.step5_tbl .grp {
+    position: relative;
+    width: 100%;
+    height: 25px;
+    background-color: #ccc;
+    color: #fff;
+}
+
+div {
+    display: block;
+}
+
+
+@media (min-width: 768px)
+.step5_tbl td {
+    padding: 6px 0;
+    font-size: 16px;
+    font-family: Helvetica,AppleSDGothicNeo-Regular,sans-serif;
+}
+
+.step5_tbl td {
+    padding: 5px 0;
+    font-size: 15px;
+    text-align: center;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+body, input, textarea, select, button, table {
+    font-size: 14px;
+    line-height: 1.25em;
+}

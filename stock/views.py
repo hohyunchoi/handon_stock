@@ -142,6 +142,7 @@ def stockdetail(request):
         sosok = 'KOSDAK'
     return render(request,"stockdetail.html",{"name":name,"code":code,'sosok':sosok})
 
+
 def today(request):
     code = request.GET['code']
     url = 'https://finance.naver.com/item/main.nhn?code='+code
@@ -198,8 +199,54 @@ def today(request):
         sigacolor = 'black'
     chart = soup.select('#img_chart_area')[0]['src']
     date = soup.select('.date')[0].text
+    hoga = str(soup.select('#tab_con2 > table')[0])
+    hogatable = gethogatable(request,code)
+
     return render(request,"stocktodayserver.html",{"price":price,"priceupdown":priceupdown,"priceper":priceper,"yesterday":yesterday,"pricemax":pricemax,
                                                    "dill":dill,"pricesiga":pricesiga,"pricemin":pricemin,"updown":updown,"dillprice":dillprice,
                                                    "chart":chart,'maxcolor':maxcolor,'mincolor':mincolor,'sigacolor':sigacolor,
-                                                   'color':color,'date':date})
+                                                   'color':color,'date':date,"hoga":hogatable})
+hogatable = "";
+def gethogatable(request,code):
+    url = 'https://finance.naver.com/item/main.nhn?code=' + code
+    print(url)
+    site = rq.get(url)
+    site2 = site.content.decode('euc-kr')
+    soup = bs(site2, 'html.parser')
+    hogamax = []
 
+
+    for i in range(5, 10):
+        hoga1 = int(''.join(
+            soup.select('#tab_con2 > table .f_down td:nth-child(1)')[i].text.replace('\n', "").replace('\t', "").split(
+                ',')))
+        print(hoga1)
+        hogamax.append(hoga1)
+    for i in range(0, 5):
+        hoga2 = int(''.join(
+            soup.select('#tab_con2 > table .f_up td:nth-child(3)')[i].text.replace('\n', "").replace('\t', "").split(
+                ',')))
+        print(hoga2)
+        hogamax.append(hoga2)
+    print(hogamax)
+    hogatable = '''<table class="hoga"><thead><tr><td>매도잔량</td><td>호가<td><td>매수잔량</td></tr><thead>
+    <tfoot><tr><td></td><td></td><td></td></tr></tfoot><tbody>
+    '''
+    for i in range(5, 10):
+        print(hogamax[i - 5])
+        hoga1 = soup.select('#tab_con2 > table .f_down td:nth-child(1)')[i].text
+        hoga2 = soup.select('#tab_con2 > table .f_down td:nth-child(2)')[i].text
+        hogatable += '<tr class="f_down"><td><div class="grp"><div style="width:' + str(
+            int((int(hogamax[i - 5]) / max(hogamax)) * 100)) + '%;">' + str(
+            hoga1) + '</div></div></td><td>' + str(hoga2) + '</td><td></td></tr>'
+    for i in range(0, 5):
+        hoga1 = soup.select('#tab_con2 > table .f_up td:nth-child(2)')[i].text
+        hoga2 = soup.select('#tab_con2 > table .f_up td:nth-child(3)')[i].text
+        hogatable += '<tr class="f_up"><td></td><td>' + str(hoga1) + '</td><td><div class="grp"><div style="width:' + str(
+            int((hogamax[i + 5] / max(hogamax)) * 100)) + '%;">' + str(hoga2) + '</div></td></tr>'
+    hogatable += '</tbody></table>'
+    return hogatable
+
+def order(request):
+
+    return render(request,"stockorder.html")

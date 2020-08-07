@@ -26,4 +26,5 @@ urlpatterns = [
     path("page_ajax",views.paging),
     path("stockdetail",views.stockdetail),
     path("stocktoday",views.today),
+    path("stockorder",views.order),
 ]

@@ -9,7 +9,7 @@ import cx_Oracle as ora
 
 def connections():
     try:
-        conn = ora.connect('hd/hd@192.168.0.18:1521/orcl', encoding='utf-8')
+        conn = ora.connect('hd/hd@192.168.0.122:1521/orcl', encoding='utf-8')
     except Exception as e:
         conn = "예외 발생"
         print(conn)

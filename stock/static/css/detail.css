@@ -1,24 +1,3 @@
-  #content table {
-    width: 100%;
-    border-top: 1px solid #eee;
-    border-collapse: collapse;
-  }
-  #paging table{
-     width: 100%;
-  }
-
-  #content th,  #content td {
-    border-bottom: 1px solid #eee;
-    text-align:center;
-  }
-
-  #content thead th{
-  background : #E0ECF8
-  }
-
-  #content tbody td{
-  background : #FFFFFF
-  }
 ul li {list-style:none; }
 .total_lst{margin:0 -1px -1px 0;
            padding:0 0 0 0;
@@ -104,23 +83,50 @@ li.evote div:first-child{padding-top:3px}
 
 .col-1{-ms-flex:0 0 8.333333%;flex:0 0 8.333333%;max-width:8.333333%}.col-2{-ms-flex:0 0 16.666667%;flex:0 0 16.666667%;max-width:16.666667%}.col-3{-ms-flex:0 0 25%;flex:0 0 25%;max-width:25%}.col-4{-ms-flex:0 0 33.333333%;flex:0 0 33.333333%;max-width:33.333333%}.col-5{-ms-flex:0 0 41.666667%;flex:0 0 41.666667%;max-width:41.666667%}.col-6{-ms-flex:0 0 50%;flex:0 0 50%;max-width:50%}.col-7{-ms-flex:0 0 58.333333%;flex:0 0 58.333333%;max-width:58.333333%}.col-8{-ms-flex:0 0 66.666667%;flex:0 0 66.666667%;max-width:66.666667%}.col-9{-ms-flex:0 0 75%;flex:0 0 75%;max-width:75%}.col-10{-ms-flex:0 0 83.333333%;flex:0 0 83.333333%;max-width:83.333333%}.col-11{-ms-flex:0 0 91.666667%;flex:0 0 91.666667%;max-width:91.666667%}.col-12{-ms-flex:0 0 100%;flex:0 0 100%;max-width:100%}
 
-.f_down td:first-child > div >div{
+.hoga {
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+    border-top:1px solid #eee;
+    border-left:1px solid #eee;
+    border-right:1px solid #eee;
+    border-bottom:1px solid #eee;
+}
+.hoga tr td:nth-child(2){
+    border-right:1px solid;
+}
+.hoga tr td{
+    padding:5px 0 5px 0;
+}
+ .grp {
+    position: relative;
+    width: 100%;
+    height: 25px;
+    background-color: #ccc;
+}
+.f_down .grp div{
+    background:#4E8DFB;
+    display:block;
+    height:100%;
     color:blue;
-}
-.f_down > tr > td:nth-child(2){
-    background:blue;
-}
-.f_up td:last-child > div > div{
-    color:red;
-}
-.f_up > tr > td:nth-child(2){
-    background:red;
+    line-height:25px;
+    float:right;
+    text-align:right;
+    direction: rtl;
 }
 
-.total td:first-child{
-    color:blue;
-}
-.total td:last-child{
-    color:red;
+.f_down .grp em{
+
 }
 
+.f_up .grp div{
+    background:#fceae9;
+    display:block;
+    height:100%;
+    color:red;
+    line-height:25px;
+    text-align:left;
+}
+
+.f_down .grp em{
+}

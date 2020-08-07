@@ -16,7 +16,7 @@
         <link href="{% static 'css/jquery.mobile-1.2.0.min.css'%}" rel="stylesheet">
         <link href="{% static 'css/photoswipe.css'%}" rel="stylesheet">
         <link href="{% static 'css/style.css'%}" rel="stylesheet">
-        <link href="{% static 'css/detail.css'%}" rel="stylesheet">
+        <link href="{% static 'css/table.css'%}" rel="stylesheet">
         <script src="{% static 'js/script.js'%}"></script>
         <script src="{% static 'js/settings.js'%}"></script>
         <script src="{% static 'js/klass.min.js'%}"></script>
@@ -45,26 +45,6 @@
 <script>
 $(document).ready(function(){
 var code = $('#code').val()
-    $.ajax({ url:'stocktoday?code='+code,
-    success:function(data){
-    data = data.replace(/&lt;/gi,'<').replace(/&gt;/gi, '>').replace(/&quot;/gi, '\"').replace(/&amp;/gi,"&")
-
-        $('#content').html(data)
-
-        $('#order').on('click',function(){
-                alert('12')
-                 location.href = 'stockorder?code='+code
-
-        })
-
-
-        }
-    })
-
-
-ajaxdetail = setInterval(function(){
-
-},10000);
 
 
 
