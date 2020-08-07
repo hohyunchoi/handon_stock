@@ -146,7 +146,6 @@ def stockdetail(request):
 def today(request):
     code = request.GET['code']
     url = 'https://finance.naver.com/item/main.nhn?code='+code
-    print(url)
     site = rq.get(url)
     site2 = site.content.decode('euc-kr')
     soup = bs(site2, 'html.parser')
@@ -209,29 +208,26 @@ def today(request):
 hogatable = "";
 def gethogatable(request,code):
     url = 'https://finance.naver.com/item/main.nhn?code=' + code
-    print(url)
     site = rq.get(url)
     site2 = site.content.decode('euc-kr')
     soup = bs(site2, 'html.parser')
     hogamax = []
-
-
+    tdown = soup.select('tr.total > td.f_down')[0].text.replace("\n", "").replace('\t', "")
+    tup = soup.select('tr.total > td.f_up')[0].text.replace("\n", "").replace('\t', "")
+    dealay = soup.select('.txt_color')[0].text
     for i in range(5, 10):
         hoga1 = int(''.join(
             soup.select('#tab_con2 > table .f_down td:nth-child(1)')[i].text.replace('\n', "").replace('\t', "").split(
                 ',')))
-        print(hoga1)
+
         hogamax.append(hoga1)
     for i in range(0, 5):
         hoga2 = int(''.join(
             soup.select('#tab_con2 > table .f_up td:nth-child(3)')[i].text.replace('\n', "").replace('\t', "").split(
                 ',')))
-        print(hoga2)
+
         hogamax.append(hoga2)
-    print(hogamax)
-    hogatable = '''<table class="hoga"><thead><tr><td>매도잔량</td><td>호가<td><td>매수잔량</td></tr><thead>
-    <tfoot><tr><td></td><td></td><td></td></tr></tfoot><tbody>
-    '''
+    hogatable = '<table class="hoga"><thead><tr><td>매도잔량</td><td>호가</td><td>매수잔량</td></tr><thead><tfoot><tr><td>'+tdown+'</td><td>잔량합계<br><span>'+dealay+'</span></td><td>'+tup+'</td></tr></tfoot><tbody>'
     for i in range(5, 10):
         print(hogamax[i - 5])
         hoga1 = soup.select('#tab_con2 > table .f_down td:nth-child(1)')[i].text

@@ -91,9 +91,28 @@ li.evote div:first-child{padding-top:3px}
     border-left:1px solid #eee;
     border-right:1px solid #eee;
     border-bottom:1px solid #eee;
+    margin-right:-1px;
+}
+.hoga thead{
+    border-bottom:1px solid #eee;
+}
+.hoga tfoot tr td span{
+    color:#ccc;
+    font-size:10px;
+}
+
+.hoga tfoot {
+    border-top:1px solid #eee;
+}
+.hoga tfoot tr td:first-child{
+    color:blue;
+}
+.hoga tfoot tr td:last-child{
+    color:red;
 }
 .hoga tr td:nth-child(2){
-    border-right:1px solid;
+    border-right:1px solid #eee;
+    border-left:1px solid #eee;
 }
 .hoga tr td{
     padding:5px 0 5px 0;
@@ -105,7 +124,7 @@ li.evote div:first-child{padding-top:3px}
     background-color: #ccc;
 }
 .f_down .grp div{
-    background:#4E8DFB;
+    background:#81DAF5;
     display:block;
     height:100%;
     color:blue;
@@ -114,9 +133,9 @@ li.evote div:first-child{padding-top:3px}
     text-align:right;
     direction: rtl;
 }
-
-.f_down .grp em{
-
+.hoga .f_down td:nth-child(2){
+    background:#81DAF5;
+    color:blue;
 }
 
 .f_up .grp div{
@@ -127,6 +146,7 @@ li.evote div:first-child{padding-top:3px}
     line-height:25px;
     text-align:left;
 }
-
-.f_down .grp em{
+.hoga .f_up td:nth-child(2){
+    background:#fceae9;
+    color:red;
 }
