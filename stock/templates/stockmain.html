@@ -36,7 +36,7 @@
                         <a data-theme="d" data-corners="false" data-role="button" href="#profile" style="width:260px">
                             <div id="account">
                                 계좌: <br>
-                                출금 가능금액
+                                출금 가능금액:
 
                             </div>
 
@@ -78,15 +78,15 @@
 <script>
 $(document).ready(function(){
 
-
-
- var search_key = $('#search_input').val()
+var search_key = $('#search_input').val()
 
   $.ajax({ url:'account_ajax',
     success:function(data){
     $('#account').html(data)
      }
      })
+
+
 
 
 })

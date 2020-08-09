@@ -27,4 +27,5 @@ urlpatterns = [
     path("stockdetail",views.stockdetail),
     path("stocktoday",views.today),
     path("stockorder",views.order),
+    path("hogatable",views.hogatable),
 ]

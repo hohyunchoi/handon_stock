@@ -18,6 +18,20 @@ def connections():
     return conn
 
 
+def addcode(**key):
+    conn= connections()
+    cursor = conn.cursor()
+    sql_addcode = 'insert into stock_code values(stock_code_seq.nextVal,:code,:name)'
+    try:
+        cursor.execute(sql_addcode,code=key['code'],name=key['name'])
+        conn.commit()
+    except Exception as e:
+        print('입력 오류', e,key['code'],key['name'])
+    finally:
+        cursor.close()
+        conn.close()
+
+
 def idcheck(**key):
     conn = connections()
     cursor = conn.cursor()
@@ -66,3 +80,18 @@ def account(**key):
         cursor.close()
         conn.close()
     return account
+
+def getcode(**key):
+    conn = connections()
+    cursor = conn.cursor()
+    sql_code = "select code from stock_code where name = :name"
+    try:
+        cursor.execute(sql_code,name=key['name'])
+    except Exception as e:
+        print('출력 오류', e)
+    finally:
+        code = cursor.fetchall()[0][0]
+        print('code=',code)
+        cursor.close()
+        conn.close()
+    return code

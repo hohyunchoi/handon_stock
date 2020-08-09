@@ -16,7 +16,7 @@
         <link href="{% static 'css/jquery.mobile-1.2.0.min.css'%}" rel="stylesheet">
         <link href="{% static 'css/photoswipe.css'%}" rel="stylesheet">
         <link href="{% static 'css/style.css'%}" rel="stylesheet">
-        <link href="{% static 'css/table.css'%}" rel="stylesheet">
+        <link href="{% static 'css/detail.css'%}" rel="stylesheet">
         <script src="{% static 'js/script.js'%}"></script>
         <script src="{% static 'js/settings.js'%}"></script>
         <script src="{% static 'js/klass.min.js'%}"></script>
@@ -32,7 +32,14 @@
             </div>
 
             <div data-role="content" id="content" style="overflow-x:auto">
+                <div id="contentdiv">
 
+                </div>
+                <div id="orderbox">
+                    <input type="text" min="1" step="1" id="stock" value="1">
+                    <input type="text" min="50" step="50" value="{{f_down}}" id="stockprice" onkeyup="numberWithCommas(this.value)">
+                    <input type="button" value="매수하기">
+                </div>
             </div>
 
             <div data-role="footer">
@@ -43,13 +50,29 @@
     <input type="hidden" id="code" value="{{code}}">
     </body>
 <script>
+
+
 $(document).ready(function(){
 var code = $('#code').val()
-
-
-
-
+    $.ajax({ url:'hogatable?code='+code,
+        success:function(data){
+        data = data.replace(/&lt;/gi,'<').replace(/&gt;/gi, '>').replace(/&quot;/gi, '\"').replace(/&amp;/gi,"&")
+        $('#contentdiv').html(data)
+        }
+    })
 })
+
+function numberWithCommas(x) {
+  x = x.replace(/[^0-9]/g,'');
+  x = x.replace(/,/g,'');
+  x = parseInt(x)
+  if(x%50 != 0){
+
+    x = x-(x%50)
+  }
+  x = String(x);
+  $("#stockprice").val(x.replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+}
 
 
 </script>

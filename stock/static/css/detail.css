@@ -150,3 +150,7 @@ li.evote div:first-child{padding-top:3px}
     background:#fceae9;
     color:red;
 }
+
+#orderbox > input{
+    text-align:center;
+}

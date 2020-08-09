@@ -6,6 +6,35 @@ from bs4 import BeautifulSoup as bs
 import pandas as pd
 from selenium import webdriver
 import requests as rq
+'''
+driver = webdriver.Chrome('C:\ikosmo64\chromedriver.exe')
+driver.get('https://www.ktb.co.kr/trading/popup/itemPop.jspx')
+#driver.find_element_by_class_name('txt_s')
+html = driver.page_source
+soup = bs(html, 'html.parser')
+code = soup.select('.tbody_content > tr > td:first-child')
+name= soup.select('.tbody_content > tr > td:last-child')
+
+codelist= []
+for i in code:
+    codelist.append(i.text)
+
+namelist = []
+for i in name:
+    namelist.append(i.text.rstrip())
+for code,name in zip(codelist,namelist):
+    addcode(code=code,name=name)
+    
+    create table stock_code(
+c_num number primary key,
+code varchar2(10),
+name varchar2(90));
+
+create sequence stock_code_seq
+increment by 1
+start with 1;
+    '''
+
 
 @csrf_exempt
 def login(request):
@@ -133,13 +162,17 @@ def paging(request):
 def stockdetail(request):
     name = request.GET['name']
     sosok = request.GET['sosok']
-    df = pd.read_html('http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=13', header=0)[0]
+    request.session['name'] = name
+    code = models.getcode(name=name)
+    """df = pd.read_html('http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=13', header=0)[0]
     code = str(df[df['회사명'] == name]['종목코드'].values[0])
-    code = code.zfill(6)
+    code = code.zfill(6)"""
     if sosok  == '0':
         sosok = 'KOSPI'
     else:
         sosok = 'KOSDAK'
+    request.session['sosok'] = sosok
+
     return render(request,"stockdetail.html",{"name":name,"code":code,'sosok':sosok})
 
 
@@ -205,7 +238,7 @@ def today(request):
                                                    "dill":dill,"pricesiga":pricesiga,"pricemin":pricemin,"updown":updown,"dillprice":dillprice,
                                                    "chart":chart,'maxcolor':maxcolor,'mincolor':mincolor,'sigacolor':sigacolor,
                                                    'color':color,'date':date,"hoga":hogatable})
-hogatable = "";
+
 def gethogatable(request,code):
     url = 'https://finance.naver.com/item/main.nhn?code=' + code
     site = rq.get(url)
@@ -241,8 +274,23 @@ def gethogatable(request,code):
         hogatable += '<tr class="f_up"><td></td><td>' + str(hoga1) + '</td><td><div class="grp"><div style="width:' + str(
             int((hogamax[i + 5] / max(hogamax)) * 100)) + '%;">' + str(hoga2) + '</div></td></tr>'
     hogatable += '</tbody></table>'
+    request.session['hogatable'] = hogatable
     return hogatable
 
 def order(request):
+    name = request.session['name']
+    sosok = request.session['sosok']
+    code = request.GET['code']
+    hogatable = gethogatable(request,code)
+    soup = bs(hogatable, 'html.parser')
+    f_down = soup.select('.f_down td:nth-child(2)')[4].text
+    f_down = f_down.replace("\n", "").replace('\t', "")
+    f_up = soup.select('.f_up td:nth-child(2)')[0].text
+    f_up = f_up.replace("\n", "").replace('\t', "")
 
-    return render(request,"stockorder.html")
+    return render(request,"stockorder.html",{"name":name,"code":code,"sosok":sosok,"f_down":f_down,"f_up":f_up})
+
+def hogatable(request):
+    code = request.GET['code']
+    hogatable = request.session['hogatable']
+    return render(request,"hogatableserver.html",{"hogatable":hogatable})
