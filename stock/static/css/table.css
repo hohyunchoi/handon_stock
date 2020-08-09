@@ -124,3 +124,22 @@ li.evote div:first-child{padding-top:3px}
     color:red;
 }
 
+#footerspace {
+    height:80px;
+}
+#footer {
+width:100%;
+    bottom:0;
+    position:fixed;
+    z-index:999;
+}
+#headerspace{
+    height: 60px;
+}
+#header {
+    width:100%;
+    top:0;
+    position:fixed;
+    z-index:999;
+
+}
