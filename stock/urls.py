@@ -15,8 +15,8 @@ Including another URLconf
 from django.urls import path
 from stock import views
 urlpatterns = [
-    path('', views.login),
-    path('login', views.login, name="login"),
+    path('', views.login, name="login"),
+    path('login', views.login),
     path('home', views.home, name="home"),
     path("logout", views.logout, name="logout"),
     path("account_ajax", views.account),

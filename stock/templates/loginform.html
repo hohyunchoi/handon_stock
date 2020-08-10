@@ -25,12 +25,11 @@
 
     <body>
 
-    <div data-role="page" id="home">
             <div data-role="header">
                 <h1>HD주식</h1>
             </div>
             <div data-role="content">
-                <form method="post" action="login">
+                <form method="post" name="form1">
                  {% csrf_token %}
                     <table width="100%">
                         <thead>
@@ -39,9 +38,8 @@
                             </tr>
                         </thead>
                         <tfoot>
-                            <tr><th colspan="2"><input type="submit" value="로그인">
-                            <input type="button" value="회원가입" onclick=""></th></tr>
-
+                            <tr><th colspan="2"><input type="button" onclick="login()" value="로그인">
+                            <input type="button" value="회원가입" ></th></tr>
                         </tfoot>
                         <tbody>
                             <tr>
@@ -64,7 +62,16 @@
                 <h2>HD금융</h2>
                 <p class="copyright">&copy; Copyright 2020</p>
             </div>
-        </div>
-    </body>
 
+    </body>
+<script>
+$(document).ready(function(){
+
+
+});
+function login(){
+        document.form1.action="login"
+        document.form1.submit()
+    }
+</script>
 </html>

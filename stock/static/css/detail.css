@@ -150,7 +150,23 @@ li.evote div:first-child{padding-top:3px}
     background:#fceae9;
     color:red;
 }
-
-#orderbox > input{
+.orderbox{
+    background:white;
+    border:1px solid #eee;
+}
+.orderbox input{
     text-align:center;
+    border-radius: 0;
+    box-shadow: none;
+    height:40px;
+    background:white;
+}
+.updown{
+    margin-top:8px;
+    margin-bottom:5px;
+    padding-top:7px;
+    text-align:center;
+    border: 1px solid;
+    background:white;
+    height:31px;
 }

@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect,HttpResponseRedirect, HttpResponse
 from stock import models
 # Create your views here.
 from django.views.decorators.csrf import csrf_exempt
@@ -24,7 +24,7 @@ for i in name:
 for code,name in zip(codelist,namelist):
     addcode(code=code,name=name)
 
-    create table stock_code(
+create table stock_code(
 c_num number primary key,
 code varchar2(10),
 name varchar2(90));
@@ -61,7 +61,6 @@ def join(request):
 def home(request):
     profile = request.session.get("user")
     return render(request, "stockmain.html", {"profile": profile})
-
 
 def logout(request):
     if 'user' in request.session:
@@ -262,7 +261,7 @@ def gethogatable(request, code):
     dealay = soup.select('.txt_color')[0].text
     for i in range(5, 10):
         hoga1 = int(''.join(
-            soup.select('#tab_con2 > table .f_down td:nth-child(1)')[i].text.replace('\n', "").replace('\t', "").split(
+            soup.select('#tab_con2 > table .f_down td:nth-child(1)')[i].text.replace('\n', "").replace('\t', "").replace('\xa0',"").split(
                 ',')))
 
         hogamax.append(hoga1)

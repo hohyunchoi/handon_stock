@@ -17,52 +17,48 @@
         <link href="{% static 'css/jquery.mobile-1.2.0.min.css'%}" rel="stylesheet">
         <link href="{% static 'css/photoswipe.css'%}" rel="stylesheet">
         <link href="{% static 'css/style.css'%}" rel="stylesheet">
+        <link href="{% static 'css/templates.css'%}" rel="stylesheet">
         <script src="{% static 'js/script.js'%}"></script>
         <script src="{% static 'js/settings.js'%}"></script>
         <script src="{% static 'js/klass.min.js'%}"></script>
         <script src="{% static 'js/code.photoswipe.jquery-3.0.5.min.js'%}"></script>
     </head>
-
     <body>
 
         <!-- homepage -->
-        <div data-role="page" id="home">
-            <div data-role="header">
-                <h1>Mobile Portfolio</h1>
+             <div id="headerspace"></div>
+            <div data-role="header" id="header">
+                <h1>HD주식</h1>
             </div>
             <div data-role="content">
-
                 <div class="pt-menu">
-                        <a data-theme="d" data-corners="false" data-role="button" href="#profile" style="width:260px">
+                        <div data-theme="d" data-corners="false" data-role="button" href="#profile" style="width:260px">
                             <div id="account">
                                 계좌: <br>
                                 출금 가능금액:
-
                             </div>
+                        </div>
 
-
-                        </a>
-
-                        <a data-theme="d" data-corners="false" data-role="button" href="stockchart?sosok=0&page=1">
+                        <div data-theme="d" data-corners="false" id="chart" data-role="button" >
 
                             주식순위
 
-                        </a>
+                        </div>
 
-                        <a data-theme="d" data-corners="false" data-role="button" href="#portfolio">
+                        <div data-theme="d" data-corners="false" data-role="button" href="#portfolio">
 
                             주식잔고
-                        </a>
+                        </div>
 
-                        <a data-theme="d" data-corners="false" data-role="button" href="#social">
+                        <div data-theme="d" data-corners="false" data-role="button" href="#social">
 
                             주식주문
-                        </a>
+                        </div>
 
-                        <a data-theme="d" data-corners="false" data-role="button" href="#contact">
+                        <div data-theme="d" data-corners="false" data-role="button" href="#contact">
 
                             관심종목
-                        </a>
+                        </div>
 
                     </div>
                 {{profile}}
@@ -72,26 +68,22 @@
                 <h2>Mobile Portfolio</h2>
                 <p class="copyright">&copy; Copyright 2020</p>
             </div>
-        </div>
     </body>
-
-<script>
+    <script>
 $(document).ready(function(){
-
-var search_key = $('#search_input').val()
-
-  $.ajax({ url:'account_ajax',
-    success:function(data){
-    $('#account').html(data)
-     }
-     })
+    $.ajax({
+        url:'account_ajax',
+        success:function(data){
+            $('#account').html(data)
+        }
+    })
 
 
-
-
+    $('#chart').click(function(){
+        location.href="stockchart?sosok=0&page=1"
+    })
 })
 
 
-</script>
-
+    </script>
 </html>

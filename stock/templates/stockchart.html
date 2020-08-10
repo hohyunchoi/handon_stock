@@ -17,6 +17,7 @@
         <link href="{% static 'css/photoswipe.css'%}" rel="stylesheet">
         <link href="{% static 'css/style.css'%}" rel="stylesheet">
         <link href="{% static 'css/table.css'%}" rel="stylesheet">
+        <link href="{% static 'css/templates.css'%}" rel="stylesheet">
         <script src="{% static 'js/script.js'%}"></script>
         <script src="{% static 'js/settings.js'%}"></script>
         <script src="{% static 'js/klass.min.js'%}"></script>
@@ -25,7 +26,7 @@
 
     <body>
 
-    <div data-role="page" id="home">
+
         <div id="headerspace"></div>
             <div data-role="header" id="header">
                 <h1>HD주식</h1>
@@ -58,12 +59,10 @@
                 <h2>HD금융</h2>
                 <p class="copyright">&copy; Copyright 2020</p>
             </div>
-        </div>
+
 <input type="hidden" id="page" name="page" value="{{page}}">
     </body>
 <script>
-$(document).ready(function(){
-    alert('123')
    var sosok = $('#sosok').val()
    if(sosok == ""){
    sosok='0'
@@ -119,10 +118,6 @@ $(document).ready(function(){
 })
 
 
-
-
-
-})
 
 
 </script>

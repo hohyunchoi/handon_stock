@@ -25,23 +25,84 @@
 
     <body>
 
-    <div data-role="page" id="home">
+    <div data-role="page" id="buy">
             <div data-role="header">
                 <h1>{{name}}</h1>
                 <p style="text-align:center; font-size:10px; margin-top:-10px;">{{code}}  {{sosok}}</p>
             </div>
 
-            <div data-role="content" id="content" style="overflow-x:auto">
-                <div id="contentdiv">
+            <div data-role="content" id="buycontent" style="overflow-x:auto">
+                <div>
+                    <a data-theme="d" data-corners="false" data-role="button" href="#buy"> 매수</a>
+                    <a data-theme="d" data-corners="false" data-role="button" href="#sell"> 매도</a>
 
                 </div>
-                <div id="orderbox">
-                    <input type="text" min="1" step="1" id="stock" value="1">
-                    <input type="text" min="50" step="50" value="{{f_down}}" id="stockprice" onkeyup="numberWithCommas(this.value)">
-                    <input type="button" value="매수하기">
+                <div id="buycontentdiv">
+
+                </div>
+                <div class="orderbox">
+                    <div class="row">
+                        <div class="col-3"></div>
+                        <div id="buystockdown" class="col-1 updown stockdown">▼</div>
+                        <input type="text" id="buystock" placeholder="수량 입력" class="col-4">
+                        <div id="buystockup" class="col-1 updown stockup">▲</div>
+                        <div class="col-3"></div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-3"></div>
+                        <div id="buydown" class="col-1 updown stockpricedown">▼</div>
+                        <input type="text" min="50" step="50" value="{{f_down}}" id="buystockprice" class="col-4 price">
+                        <div id="buyup" class="col-1 updown stockpriceup">▲</div>
+                        <div class="col-3"></div>
+                    </div>
+                    <div id="buybtn">구매하기</div>
                 </div>
             </div>
+            <input type="hidden" value="{{f_down}}" id="f_down">
+            <input type="hidden" id="step">
+            <div data-role="footer">
+                <h2>HD금융</h2>
+                <p class="copyright">&copy; Copyright 2020</p>
+            </div>
+        </div>
 
+    <div data-role="page" id="sell">
+            <div data-role="header">
+                <h1>{{name}}</h1>
+                <p style="text-align:center; font-size:10px; margin-top:-10px;">{{code}}  {{sosok}}</p>
+            </div>
+
+            <div data-role="content" id="sellcontent" style="overflow-x:auto">
+                <div>
+                    <a data-theme="d" data-corners="false" data-role="button" href="#buy"> 매수</a>
+                    <a data-theme="d" data-corners="false" data-role="button" href="#sell"> 매도</a>
+
+                </div>
+                <div id="sellcontentdiv">
+
+                </div>
+                <div class="orderbox">
+
+                    <div class="row">
+                        <div class="col-3"></div>
+                        <div id="sellstockdown" class="col-1 updown stockdown">▼</div>
+                        <input type="text" id="sellstock" placeholder="수량 입력" class="col-4">
+                        <div id="sellstockup updown" class="col-1 updown stockup">▲</div>
+                        <div class="col-3"></div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-3"></div>
+                        <div id="selldown" class="col-1 updown stockpricedown">▼</div>
+                        <input type="text" min="50" step="50" value="{{f_up}}" id="sellstockprice" class="col-4 price">
+                        <div id="sellup" class="col-1 updown stockpriceup">▲</div>
+                        <div class="col-3"></div>
+                    </div>
+                    <input type="button" id="sellorder" value="매수하기">
+                </div>
+            </div>
+            <input type="hidden" value="{{f_up}}" id="f_up">
             <div data-role="footer">
                 <h2>HD금융</h2>
                 <p class="copyright">&copy; Copyright 2020</p>
@@ -54,26 +115,115 @@
 
 $(document).ready(function(){
 var code = $('#code').val()
+var f_down = $('#f_down').val().replace(/,/gi,'') * 1
+var f_up = $('#f_up').val().replace(/,/gi,'') * 1
+var step = f_down - f_up
+
+
     $.ajax({ url:'hogatable?code='+code,
         success:function(data){
         data = data.replace(/&lt;/gi,'<').replace(/&gt;/gi, '>').replace(/&quot;/gi, '\"').replace(/&amp;/gi,"&")
-        $('#contentdiv').html(data)
+        $('#buycontentdiv').html(data)
+        $('#sellcontentdiv').html(data)
         }
     })
-})
 
-function numberWithCommas(x) {
-  x = x.replace(/[^0-9]/g,'');
+    $('input').keyup(function(){
+
+        x = $(this).val()
+        x = x.replace(/[^0-9]/g,'');
   x = x.replace(/,/g,'');
-  x = parseInt(x)
-  if(x%50 != 0){
+  $(this).val(x.replace(/\B(?=(\d{3})+(?!\d))/g, ","));
 
-    x = x-(x%50)
-  }
-  x = String(x);
-  $("#stockprice").val(x.replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-}
+    })
 
+
+    $('.price').focusout(function(){
+        var price = $(this).val().replace(/,/gi,'')*1
+        if((price%step)!=0){
+            price -= (price%step);
+            price += "";
+            price = price.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+            $(this).val(price)
+        }
+    })
+
+
+    $('.stockup').click(function(){
+        x = $(this).parent().children('input').val().replace(/,/gi,'')
+        if(x==''){
+            x='1'
+            $(this).parent().children('input').val(x)
+            return
+        }
+        x*=1;
+        if(x>0){
+            x+=1;
+            x+='';
+            x = x.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+            $(this).parent().children('input').val(x)
+        }
+
+    })
+
+    $('.stockdown').click(function(){
+        x = $(this).parent().children('input').val().replace(/,/gi,'')
+        if(x==''){
+            return
+        }
+        x *=1
+        console.log(typeof(x))
+        if((x-1)==0){
+            $(this).parent().children('input').val('')
+            return
+        }
+        if((x-1)>0){
+            x -= 1;
+            x += "";
+            x = x.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+            $(this).parent().children('input').val(x)
+            return
+        }
+
+    })
+
+
+    $('.stockpriceup').click(function(){
+        price = $(this).parent().children('input').val().replace(/,/gi,'')*1
+        price += step;
+        price += "";
+        price = price.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+        $(this).parent().children('input').val(price)
+
+    })
+
+    $('.stockpricedown').click(function(){
+        var price = $(this).parent().children('input').val().replace(/,/gi,'')*1
+        if((price-step)<=0){
+            alert('가격을 확인해 주세요')
+            return
+        }else{
+            price -= step;
+            price += "";
+            price = price.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+            $(this).parent().children('input').val(price)
+        }
+    })
+
+    $('.updown').click(function(){
+        stock = $(this).parent().parent().children('div:first-child').children('input').val().replace(/,/gi,'')*1
+        price = $(this).parent().parent().children('div:nth-child(2)').children('input').val().replace(/,/gi,'')*1
+        count = stock*price
+        count += "";
+        count = count.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+        btn = $('#buybtn').text().split(' ')[0]
+        count = btn+' '+count+'원'
+        $('#buybtn').text(count)
+
+    })
+
+
+})
 
 </script>
 
