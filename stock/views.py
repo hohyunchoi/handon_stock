@@ -383,7 +383,7 @@ def buyorder(requset):
                     # 판매자 주식지갑 주식 빠져나감
                     #판매자 지갑에 주식수
                     print('판매자 지갑에 있는 주식 수 가져오기!')
-                    sw_ju = models.selwalletstock(mem_code=sellstock[0][3],code=code)
+                    sw_ju = models.selwalletstock(mem_code=sellstock[0][3],code=code)[0][0]
                     print(sw_ju)
                     # 판매자 지갑에 있는 주식이 0개가 된다면
                     if (sw_ju - stock) == 0:
@@ -406,11 +406,18 @@ def buyorder(requset):
                     print(sellstock[0][3])
                     #판매주문의 수량 제거
                     print(sellstock[0][0])
-                    models.orderupdate(so_num=sellstock[0][0],stock=sellstock[0][4]-stock)
+
+                    print('이게 안됨')
+                    models.uporder(so_num=sellstock[0][0],stock=sellstock[0][4]-stock)
                     #로그남기기
                     models.addlog(code=code, buy_mem=mem_code, sell_mem=sellstock[0][3], stock=stock, price=price)
                     #판매자 주식 지갑 비우기
-                    models.upwalletstock(code=code, mem_code=sellstock[0][3], stock=stock)
+                    sw_ju = models.selwalletstock(mem_code=sellstock[0][3],code=code)[0][0]
+                    sw_price = models.selwalletstock(mem_code=sellstock[0][3],code=code)[0][1]
+                    sw_ju = sw_ju-stock
+                    sw_price= sw_price - (sw_price/sw_ju)*stock
+                    print('이게 안됨')
+                    models.upwalletstock(code=code, mem_code=sellstock[0][3], sw_ju=sw_ju,sw_price=sw_price)
                     print('어디냐!!')
                     #구매자 주식 지갑 채우기
 

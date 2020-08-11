@@ -260,23 +260,41 @@ def orderupdate(**key):
     except Exception as e:
         print('출력 오류', e)
     finally:
+        print(type(key['stock']))
+        print(type(key['so_num']))
         print('stock=',key['stock'])
         print('so_num=',key['so_num'])
         print('왜 앙대?')
         cursor.close()
         conn.close()
 
+def uporder(**key):
+    conn = connections()
+    cursor = conn.cursor()
+    sql_orderup = "update stock_order set so_remainju = :stock where so_num = :so_num and so_state = 1"
+    try:
+        cursor.execute(sql_orderup, stock=key['stock'], so_num=key['so_num'])
+    except Exception as e:
+        print('출력 오류', e)
+    finally:
+        print(type(key['stock']))
+        print(type(key['so_num']))
+        print('stock=', key['stock'])
+        print('so_num=', key['so_num'])
+        print('왜 앙대?')
+        cursor.close()
+        conn.close()
 
 def selwalletstock(**key):
     conn = connections()
     cursor = conn.cursor()
-    sql_sonum = "select sw_ju from stock_wallet where mem_code = :mem_code and code = :code"
+    sql_sonum = "select sw_ju,sw_price from stock_wallet where mem_code = :mem_code and code = :code"
     try:
         cursor.execute(sql_sonum,mem_code=key['mem_code'],code=key['code'])
     except Exception as e:
         print('출력 오류', e)
     finally:
-        sw_ju = cursor.fetchall()[0][0]
+        sw_ju = cursor.fetchall()
         print('111111111111111122')
         print(sw_ju)
         cursor.close()
@@ -299,9 +317,9 @@ def delwalletstock(**key):
 def upwalletstock(**key):
     conn = connections()
     cursor = conn.cursor()
-    sql_login = "update stock_wallet set sw_ju = sw_ju - 2 , sw_price = sw_price - (sw_price/sw_ju)*2, sw_orderju= sw_orderju - 2 where mem_code= 4 and code = '005930'"
+    sql_login = "update stock_wallet set sw_ju = :sw_ju , sw_price = :sw_price where mem_code= :mem_code and code = :code"
     try:
-        cursor.execute(sql_login)
+        cursor.execute(sql_login,mem_code=key['mem_code'],code=key['code'],sw_ju=key['sw_ju'],sw_price=key['sw_price'])
     except Exception as e:
         print('출력 오류', e)
     finally:
