@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup as bs
 import pandas as pd
 from selenium import webdriver
 import requests as rq
-
+from django.db import transaction
 '''
 driver = webdriver.Chrome('C:\ikosmo64\chromedriver.exe')
 driver.get('https://www.ktb.co.kr/trading/popup/itemPop.jspx')
@@ -45,7 +45,11 @@ def login(request):
             if models.idcheck(email=emailv, pw=pwv):
                 profile = models.login(email=emailv, pw=pwv)[0]
                 request.session['user'] = profile
-                return redirect("home")
+                if models.account(mem_code=request.session['user'][0])==[]:
+                    return redirect("createaccount")
+                else:
+                    request.session['account'] = models.account(mem_code=request.session['user'][0])[0]
+                    return redirect("home")
             else:
                 msg = "아이디 및 비밀번호를 확인해주세요."
                 return render(request, "loginform.html", {"msg": msg})
@@ -309,3 +313,121 @@ def hogatable(request):
     code = request.GET['code']
     hogatable = request.session['hogatable']
     return render(request, "hogatableserver.html", {"hogatable": hogatable})
+
+@csrf_exempt
+@transaction.atomic
+def buyorder(requset):
+    balance = int(requset.session['account'][1])
+    stock = int(requset.POST['stock'])
+    price = int(requset.POST['price'])
+    code = requset.POST['code']
+    sellprice = int(requset.POST['sellprice'])
+    mem_code= requset.session['user'][0]
+    so_num = models.selectso_num()
+    # 계좌 잔고와 사고자하는 잔고 비교
+    if balance > stock*price: # 잔고가 많다면
+        #원하는 가격에 판매주문이 있는지 확인
+        while stock > 0:
+            sellstock = models.checksellorder(code=code,price=price)
+            #없으면 호가와 가격 확인
+            if sellstock == [] :
+                print('판매주문 없음 호가랑 확인!')
+                # 판매호가 보다 주문가격이 높으면
+                if price >= sellprice:
+                    print('호가로 거래 바로 실행!')
+                    # 구매로그 남기기
+                    print('구매로그!!')
+                    models.addlog(code=code, buy_mem=mem_code,sell_mem=-1, stock=stock, price=price)
+                    # 주식지갑에 해당 주식이 있는지 없는지 확인
+                    # 있으면
+                    if models.checkwallet(code=code,mem_code=mem_code) == 1:
+                        #기존 주식에 추가
+                        print('기존주식에 추가!')
+                        models.updatestock(code=code,stock=stock,mem_code=mem_code,price=stock*price)
+                    #없으면
+                    else:
+                        print('새로운 주식 추가!')
+                        #새로운 주식 추가
+                        models.addstock(code=code,mem_code=mem_code,stock=stock,price=stock*price)
+
+                else:
+                    #호가보다 구매주문 가격이 낮으면 구매주문 추가
+                    models.buyorder(so_num=so_num,code=code, mem_code=mem_code, stock=stock, price=price,remainju=stock)
+
+                # 주식계좌에서 돈 빠져나감
+                models.accountout(price=stock * price, mem_code=mem_code)
+                stock=0
+
+            #같은 가격의 판매 주문이 있다면 매칭
+            else:
+                print('거래 매치!!!!')
+                # 주문량이 있는 판매주문량보다 많을 경우
+                print(' 주문량이 판매량보다 많음!')
+                if stock >= sellstock[0][1]:
+                    # 주문량 - 판매주문량
+                    stock = stock - sellstock[0][1]
+                    # 판매 주문 삭제
+                    models.delsellorder(so_num=sellstock[0][0])
+                    # 로그남기기
+                    models.addlog(code=code, buy_mem=mem_code,sell_mem=sellstock[0][3], stock=sellstock[0][1], price=price)
+                    # 주식있는지 없는지
+                    if models.checkwallet(code=code,mem_code=mem_code) == 1:
+                        #기존 주식에 추가
+                        print('기존주식에 추가!')
+                        models.updatestock(code=code,stock=sellstock[0][1],mem_code=mem_code,price=sellstock[0][1]*price)
+                    #없으면
+                    else:
+                        print('새로운 주식 추가!')
+                        #새로운 주식 추가
+                        models.addstock(code=code,mem_code=mem_code,stock=sellstock[0][1],price=sellstock[0][1]*price)
+                    # 판매자 주식지갑 주식 빠져나감
+                    #판매자 지갑에 주식수
+                    print('판매자 지갑에 있는 주식 수 가져오기!')
+                    sw_ju = models.selwalletstock(mem_code=sellstock[0][3],code=code)
+                    print(sw_ju)
+                    # 판매자 지갑에 있는 주식이 0개가 된다면
+                    if (sw_ju - stock) == 0:
+                        print('0개!!')
+                        # 주식 삭제
+                        models.delwalletstock(code=code)
+                    else:
+                        print('0개 아님!!')
+                        # 주식 업데이트
+                        models.upwalletstock(code=code,mem_code=sellstock[0][3],stock=sellstock[0][1])
+                    # 구매자 돈 빠져나가고
+                    print('돈나가요!')
+                    models.accountout(price=sellstock[0][1] * price, mem_code=mem_code)
+                    # 판매자 돈 들어옴
+                    models.accountin(price=sellstock[0][1] * price, mem_code=sellstock[0][3])
+
+                # 주문량이 판매주문량보다 적거나 같을 경우
+                else:
+                    print('판매량이 더 많음!!!')
+                    print(sellstock[0][3])
+                    #판매주문의 수량 제거
+                    print(sellstock[0][0])
+                    models.orderupdate(so_num=sellstock[0][0],stock=sellstock[0][4]-stock)
+                    #로그남기기
+                    models.addlog(code=code, buy_mem=mem_code, sell_mem=sellstock[0][3], stock=stock, price=price)
+                    #판매자 주식 지갑 비우기
+                    models.upwalletstock(code=code, mem_code=sellstock[0][3], stock=stock)
+                    print('어디냐!!')
+                    #구매자 주식 지갑 채우기
+
+                    if models.checkwallet(code=code,mem_code=mem_code) == 1:
+                        #기존 주식에 추가
+                        print('기존주식에 추가!')
+                        models.updatestock(code=code,stock=stock,mem_code=mem_code,price=stock*price)
+                    #없으면
+                    else:
+                        print('새로운 주식 추가!')
+                        #새로운 주식 추가
+                        models.addstock(code=code,mem_code=mem_code,stock=stock,price=stock*price)
+                    # 구매자 계좌 돈 빼기
+                    models.accountout(price=stock * price, mem_code=mem_code)
+                    #판매자 계좌에 돈 넣기
+                    models.accountin(price=stock * price, mem_code=sellstock[0][3])
+                    stock=0
+
+
+    return render(requset,"orderserver.html")

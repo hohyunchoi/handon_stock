@@ -1,1 +1,12 @@
-{{name}}
+
+<div id="headerspace"></div>
+{% if name ==''%}
+<div data-role="header" id="header">
+                <h1>HD주식</h1>
+            </div>
+{% else %}
+<div data-role="header">
+    <h1>{{name}}</h1>
+    <p style="text-align:center; font-size:10px; margin-top:-10px;">{{code}}  {{sosok}}</p>
+</div>
+{% endif %}

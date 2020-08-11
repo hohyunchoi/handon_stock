@@ -125,19 +125,19 @@ li.evote div:first-child{padding-top:3px}
     color:red;
 }
 
-#footerspace {
+.footerspace {
     height:80px;
 }
-#footer {
+.footer {
 width:100%;
     bottom:0;
     position:fixed;
     z-index:999;
 }
-#headerspace{
+.headerspace{
     height: 60px;
 }
-#header {
+.header {
     width:100%;
     top:0;
     position:fixed;
