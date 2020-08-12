@@ -97,12 +97,12 @@ def getcode(**key):
         conn.close()
     return code
 
-def checksellorder(**key):
+def checkorder(**key):
     conn = connections()
     cursor = conn.cursor()
-    sql_sellorder = "select so_num, so_ju, code, mem_code,so_remainju,so_price,so_state from stock_order where so_state =1 and code=:code and so_price = :price and so_date = (select min(so_date) from stock_order where code=:code and so_price = :price)"
+    sql_sellorder = "select so_num, so_ju, code, mem_code,so_remainju,so_price,so_state from stock_order where so_state = :so_state and code=:code and so_price = :price and so_date = (select min(so_date) from stock_order where code=:code and so_price = :price)"
     try:
-        cursor.execute(sql_sellorder, code=key['code'],price=key['price'])
+        cursor.execute(sql_sellorder, code=key['code'],price=key['price'],so_state=key['state'])
     except Exception as e:
         print('출력 오류', e)
     finally:
@@ -118,6 +118,7 @@ def selectso_num():
     sql_sonum = "select stock_order_seq.nextVal from dual"
     try:
         cursor.execute(sql_sonum)
+        conn.commit()
     except Exception as e:
         print('출력 오류', e)
     finally:
@@ -126,12 +127,12 @@ def selectso_num():
         conn.close()
     return so_num
 
-def buyorder(**key):
+def order(**key):
     conn = connections()
     cursor = conn.cursor()
-    sql_buyorder = 'insert into stock_order values(:so_num,:code,:mem_code,:stock,:remainju,:price,0,sysdate)'
+    sql_order = 'insert into stock_order values(:so_num,:code,:mem_code,:stock,:remainju,:price,:state,sysdate)'
     try:
-        cursor.execute(sql_buyorder, so_num=key['so_num'],code=key['code'], mem_code=key['mem_code'],stock=key['stock'],price=key['price'],remainju=key['remainju'])
+        cursor.execute(sql_order, so_num=key['so_num'],code=key['code'], mem_code=key['mem_code'],stock=key['stock'],price=key['price'],remainju=key['remainju'],state=key['state'])
         conn.commit()
     except Exception as e:
         print('입력 오류', e, key['code'], key['mem_code'],key['stock'],key['price'])
@@ -215,6 +216,7 @@ def accountout(**key):
                      where ac.ac_code = a.ac_code and ac.mem_code =:mem_code and ac.pro_code=6)"""
     try:
         cursor.execute(sql_login, mem_code=key['mem_code'],price=key['price'])
+        conn.commit()
     except Exception as e:
         print('출력 오류', e)
     finally:
@@ -231,6 +233,7 @@ def accountin(**key):
                          where ac.ac_code = a.ac_code and ac.mem_code =:mem_code and ac.pro_code=6)"""
     try:
         cursor.execute(sql_login, mem_code=key['mem_code'], price=key['price'])
+        conn.commit()
     except Exception as e:
         print('출력 오류', e)
     finally:
@@ -238,7 +241,7 @@ def accountin(**key):
         conn.close()
 
 
-def delsellorder(**key):
+def delorder(**key):
     conn = connections()
     cursor = conn.cursor()
     sql_addlog = 'delete stock_order where so_num = :so_num'
@@ -254,9 +257,10 @@ def delsellorder(**key):
 def orderupdate(**key):
     conn = connections()
     cursor = conn.cursor()
-    sql_orderup = "update stock_order set so_remainju = :stock where so_num = :so_num "
+    sql_orderup = "update stock_order set so_remainju = so_remainju - :stock where so_num = :so_num "
     try:
         cursor.execute(sql_orderup, stock=key['stock'],so_num=key['so_num'])
+        conn.commit()
     except Exception as e:
         print('출력 오류', e)
     finally:
@@ -268,27 +272,10 @@ def orderupdate(**key):
         cursor.close()
         conn.close()
 
-def uporder(**key):
-    conn = connections()
-    cursor = conn.cursor()
-    sql_orderup = "update stock_order set so_remainju = :stock where so_num = :so_num and so_state = 1"
-    try:
-        cursor.execute(sql_orderup, stock=key['stock'], so_num=key['so_num'])
-    except Exception as e:
-        print('출력 오류', e)
-    finally:
-        print(type(key['stock']))
-        print(type(key['so_num']))
-        print('stock=', key['stock'])
-        print('so_num=', key['so_num'])
-        print('왜 앙대?')
-        cursor.close()
-        conn.close()
-
 def selwalletstock(**key):
     conn = connections()
     cursor = conn.cursor()
-    sql_sonum = "select sw_ju,sw_price from stock_wallet where mem_code = :mem_code and code = :code"
+    sql_sonum = "select sw_ju,sw_price,sw_orderju from stock_wallet where mem_code = :mem_code and code = :code"
     try:
         cursor.execute(sql_sonum,mem_code=key['mem_code'],code=key['code'])
     except Exception as e:
@@ -317,9 +304,38 @@ def delwalletstock(**key):
 def upwalletstock(**key):
     conn = connections()
     cursor = conn.cursor()
-    sql_login = "update stock_wallet set sw_ju = :sw_ju , sw_price = :sw_price where mem_code= :mem_code and code = :code"
+    sql_login = "update stock_wallet set sw_ju = sw_ju - :stock , sw_price = round(sw_price - (sw_price/sw_ju)*:stock,0) where mem_code= :mem_code and code = :code"
     try:
-        cursor.execute(sql_login,mem_code=key['mem_code'],code=key['code'],sw_ju=key['sw_ju'],sw_price=key['sw_price'])
+        cursor.execute(sql_login,mem_code=key['mem_code'],code=key['code'],stock=key['stock'])
+        conn.commit();
+    except Exception as e:
+        print('출력 오류', e)
+    finally:
+        cursor.close()
+        conn.close()
+
+def upwalletstocksell(**key):
+    conn = connections()
+    cursor = conn.cursor()
+    sql_login = "update stock_wallet set sw_ju = sw_ju - :stock , sw_price = round(sw_price - (sw_price/sw_ju)*:stock,0), sw_orderju = sw_orderju-:stock where mem_code= :mem_code and code = :code"
+    try:
+        cursor.execute(sql_login, mem_code=key['mem_code'], code=key['code'], stock=key['stock'])
+        conn.commit();
+    except Exception as e:
+        print('출력 오류', e)
+    finally:
+        print(key['stock'],': 11')
+        cursor.close()
+        conn.close()
+
+def upwalletorderju(**key):
+
+    conn = connections()
+    cursor = conn.cursor()
+    sql_login = "update stock_wallet set sw_orderju = sw_orderju-:stock where mem_code= :mem_code and code = :code"
+    try:
+        cursor.execute(sql_login, mem_code=key['mem_code'], code=key['code'], stock=key['stock'])
+        conn.commit();
     except Exception as e:
         print('출력 오류', e)
     finally:

@@ -28,4 +28,5 @@ urlpatterns = [
     path("stockorder",views.order),
     path("hogatable",views.hogatable),
     path("buyorder",views.buyorder),
+    path("sellorder",views.sellorder),
 ]

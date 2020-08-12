@@ -325,10 +325,14 @@ def buyorder(requset):
     mem_code= requset.session['user'][0]
     so_num = models.selectso_num()
     # 계좌 잔고와 사고자하는 잔고 비교
+    stocktoast1 = 0
+    stocktoast2 = 0
+    msg1 = ''
+    msg2 = ''
     if balance > stock*price: # 잔고가 많다면
         #원하는 가격에 판매주문이 있는지 확인
         while stock > 0:
-            sellstock = models.checksellorder(code=code,price=price)
+            sellstock = models.checkorder(code=code,price=price,state=1)
             #없으면 호가와 가격 확인
             if sellstock == [] :
                 print('판매주문 없음 호가랑 확인!')
@@ -337,7 +341,7 @@ def buyorder(requset):
                     print('호가로 거래 바로 실행!')
                     # 구매로그 남기기
                     print('구매로그!!')
-                    models.addlog(code=code, buy_mem=mem_code,sell_mem=-1, stock=stock, price=price)
+                    models.addlog(code=code, buy_mem=mem_code,sell_mem=-1, stock=stock, price=price*stock)
                     # 주식지갑에 해당 주식이 있는지 없는지 확인
                     # 있으면
                     if models.checkwallet(code=code,mem_code=mem_code) == 1:
@@ -349,11 +353,14 @@ def buyorder(requset):
                         print('새로운 주식 추가!')
                         #새로운 주식 추가
                         models.addstock(code=code,mem_code=mem_code,stock=stock,price=stock*price)
+                    msg1 = "주 구매 완료."
+                    stocktoast1 += stock
 
                 else:
                     #호가보다 구매주문 가격이 낮으면 구매주문 추가
-                    models.buyorder(so_num=so_num,code=code, mem_code=mem_code, stock=stock, price=price,remainju=stock)
-
+                    models.order(so_num=so_num,code=code, mem_code=mem_code, stock=stock, price=price,remainju=stock,state=0)
+                    stocktoast2 +=stock
+                    msg2 = "주 구매주문 완료"
                 # 주식계좌에서 돈 빠져나감
                 models.accountout(price=stock * price, mem_code=mem_code)
                 stock=0
@@ -367,9 +374,9 @@ def buyorder(requset):
                     # 주문량 - 판매주문량
                     stock = stock - sellstock[0][1]
                     # 판매 주문 삭제
-                    models.delsellorder(so_num=sellstock[0][0])
+                    models.delorder(so_num=sellstock[0][0])
                     # 로그남기기
-                    models.addlog(code=code, buy_mem=mem_code,sell_mem=sellstock[0][3], stock=sellstock[0][1], price=price)
+                    models.addlog(code=code, buy_mem=mem_code,sell_mem=sellstock[0][3], stock=sellstock[0][1], price=price*sellstock[0][1])
                     # 주식있는지 없는지
                     if models.checkwallet(code=code,mem_code=mem_code) == 1:
                         #기존 주식에 추가
@@ -399,6 +406,8 @@ def buyorder(requset):
                     models.accountout(price=sellstock[0][1] * price, mem_code=mem_code)
                     # 판매자 돈 들어옴
                     models.accountin(price=sellstock[0][1] * price, mem_code=sellstock[0][3])
+                    stocktoast1 += sellstock[0][1]
+                    msg1 = "주 구매 완료."
 
                 # 주문량이 판매주문량보다 적거나 같을 경우
                 else:
@@ -408,16 +417,16 @@ def buyorder(requset):
                     print(sellstock[0][0])
 
                     print('이게 안됨')
-                    models.uporder(so_num=sellstock[0][0],stock=sellstock[0][4]-stock)
+                    models.orderupdate(so_num=sellstock[0][0],stock=stock)
                     #로그남기기
-                    models.addlog(code=code, buy_mem=mem_code, sell_mem=sellstock[0][3], stock=stock, price=price)
+                    models.addlog(code=code, buy_mem=mem_code, sell_mem=sellstock[0][3], stock=stock, price=price*stock)
                     #판매자 주식 지갑 비우기
-                    sw_ju = models.selwalletstock(mem_code=sellstock[0][3],code=code)[0][0]
-                    sw_price = models.selwalletstock(mem_code=sellstock[0][3],code=code)[0][1]
-                    sw_ju = sw_ju-stock
-                    sw_price= sw_price - (sw_price/sw_ju)*stock
+                    #sw_ju = models.selwalletstock(mem_code=sellstock[0][3],code=code)[0][0]
+                    #sw_price = models.selwalletstock(mem_code=sellstock[0][3],code=code)[0][1]
+                    #sw_ju = sw_ju-stock
+                    #sw_price= sw_price - (sw_price/sw_ju)*stock
                     print('이게 안됨')
-                    models.upwalletstock(code=code, mem_code=sellstock[0][3], sw_ju=sw_ju,sw_price=sw_price)
+                    models.upwalletstock(code=code, mem_code=sellstock[0][3], stock=stock)
                     print('어디냐!!')
                     #구매자 주식 지갑 채우기
 
@@ -434,7 +443,132 @@ def buyorder(requset):
                     models.accountout(price=stock * price, mem_code=mem_code)
                     #판매자 계좌에 돈 넣기
                     models.accountin(price=stock * price, mem_code=sellstock[0][3])
+                    stocktoast1 +=stock
+                    msg1 ="주 구매 완료."
                     stock=0
+    else:
+        return render(requset,"orderserver.html",{"msg":"잔고를 확인해 주세요."})
+    msg = str(stocktoast1)+msg1
+    if msg2 != '':
+        msg += "\n"+str(stocktoast2)+msg2
+
+    return render(requset,"orderserver.html",{"msg":msg})
 
 
-    return render(requset,"orderserver.html")
+@csrf_exempt
+@transaction.atomic
+def sellorder(request):
+    stock = int(request.POST['stock'])
+    price = int(request.POST['price'])
+    code = request.POST['code']
+    buyprice = int(request.POST['buyprice'])
+    mem_code = request.session['user'][0]
+    so_num = models.selectso_num()
+    print(models.selwalletstock(mem_code=mem_code,code=code))
+
+    stockbalance = models.selwalletstock(mem_code=mem_code,code=code)
+    if stockbalance == []:
+        return render(request,"orderserver.html",{"msg":"주식이 존재하지 않습니다."})
+    else:
+        stockbalance = stockbalance[0][2]
+    print('주식잔고 = ',stockbalance)
+    stocktoast1 = 0
+    stocktoast2 = 0
+    msg1 = ''
+    msg2 = ''
+    #주식 잔고가 판매주문량보다 많으면
+    if stockbalance >= stock:
+        print('주식잔고가 더 많다!')
+        #구매주문 확인
+        while stock>0:
+            buystock = models.checkorder(code=code, price=price,state=0)
+            #구매주문 없으면
+            if buystock == []:
+                print('구매주문 없음 호가랑 비교')
+                # 판매가격이  호가사는 가격보다 낮다면
+                if price < buyprice:
+                    print('호가로 거래 바로 실행!')
+                    #판매로그 남기기
+                    print('판매로그')
+                    models.addlog(code=code, buy_mem=-1, sell_mem=mem_code, stock=stock, price=price*stock)
+
+                    #주식지갑에서 판매가능주식, 주식 빼기
+                    models.upwalletstocksell(mem_code=mem_code,stock=stock,code=code)
+
+                    #주식계좌에 돈 추가
+                    models.accountin(mem_code=mem_code,price=price*stock)
+                    msg1 = '주 판매 완료.'
+                    stocktoast1 += stock
+                # 판매가격이 호가사는 가격보다 높다면
+                else:
+                    #주문넣기
+                    models.order(so_num=so_num, code=code, mem_code=mem_code, stock=stock, price=price, remainju=stock,state=1)
+                    #orderju 낮추기
+                    models.upwalletorderju(code=code, mem_code=mem_code, stock=stock)
+                    msg2 = '주 판매주문 완료.'
+                    stocktoast2 += stock
+
+                stock=0
+            #구매주문 있으면
+            else:
+                print('거래매칭!!!')
+                # 팔고싶은 수량이랑 구매 수량이랑 비교
+                if stock >= buystock[0][1]:
+                    print('판매량이 더 많다 지워!!')
+                    #판매량 - 구매주문량
+                    stock = stock - buystock[0][1]
+                    #구매주문삭제
+                    models.delorder(so_num=buystock[0][0])
+                    #로그남기기
+                    models.addlog(code=code, buy_mem=buystock[0][3], sell_mem=mem_code, stock=buystock[0][1], price=price*buystock[0][1])
+                    #주식지갑에서 주식 빼기
+                    models.upwalletstocksell(mem_code=mem_code, stock=buystock[0][1], code=code)
+                    #판매자 지갑에 돈 넣기
+                    models.accountin(price=buystock[0][1] * price, mem_code=mem_code)
+                    #구매자 주식지갑에 주식 넣기
+                    # 주식있는지 없는지
+                    if models.checkwallet(code=code, mem_code=buystock[0][3]) == 1:
+                        # 기존 주식에 추가
+                        print('기존주식에 추가!')
+                        models.updatestock(code=code, stock=buystock[0][1], mem_code=buystock[0][3],
+                                           price=buystock[0][1] * price)
+                    # 없으면
+                    else:
+                        print('새로운 주식 추가!')
+                        # 새로운 주식 추가
+                        models.addstock(code=code, mem_code=buystock[0][3], stock=buystock[0][1], price=buystock[0][1] * price)
+                    msg1 = '주 판매 완료.'
+                    stocktoast1 += buystock[0][1]
+                # 판매주문량보다 구매주문량이 크면
+                else:
+                    print('구매량이 더많다!! 구매주문 업데이트만!')
+                    #주문 수량 지우기
+                    models.orderupdate(so_num=buystock[0][0],stock=stock)
+                    #로그남기기
+                    models.addlog(code=code, buy_mem=buystock[0][3], sell_mem=mem_code, stock=stock, price=price*buystock[0][1])
+                    #판매자 주식지갑 비우기
+                    models.upwalletstocksell(code=code, mem_code=mem_code, stock=stock)
+                    #구매자 주식지갑 넣어주기
+                    if models.checkwallet(code=code, mem_code=buystock[0][3]) == 1:
+                        # 기존 주식에 추가
+                        print('기존주식에 추가!')
+                        models.updatestock(code=code, stock=buystock[0][1], mem_code=buystock[0][3],
+                                           price=buystock[0][1] * price)
+                    # 없으면
+                    else:
+                        print('새로운 주식 추가!')
+                        # 새로운 주식 추가
+                        models.addstock(code=code, mem_code=buystock[0][3], stock=buystock[0][1], price=buystock[0][1] * price)
+
+                    #판매자 돈들어오기
+                    models.accountin(price=stock * price, mem_code=mem_code)
+                    msg1 = '주 판매 완료.'
+                    stocktoast1 += stock
+                    stock = 0
+    else:
+        return render(request,"orderserver.html",{"msg":"거래 가능 주식 수가 부족합니다."})
+
+    msg = str(stocktoast1)+msg1
+    if msg2 != '':
+        msg += "\n"+str(stocktoast2)+msg2
+    return render(request, "orderserver.html",{"msg":msg})

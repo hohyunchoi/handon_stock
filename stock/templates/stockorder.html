@@ -64,7 +64,9 @@
                 </div>
             </div>
             <input type="hidden" value="{{f_down}}" id="f_down">
+
             <input type="hidden" id="step">
+            <div id="buytoast" class="toast"></div>
              <div class="footerspace"></div>
             <div data-role="footer" class="footer">
                 <h2>HD금융</h2>
@@ -106,12 +108,13 @@
                         <div id="sellup" class="col-1 updown stockpriceup">▲</div>
                         <div class="col-3"></div>
                     </div>
-                    <div class="orderbtn">판매하기
+                    <div class="sellbtn orderbtn">판매하기
                     <input type="hidden" value="1">
                     </div>
                 </div>
             </div>
             <input type="hidden" value="{{f_up}}" id="f_up">
+        <div id="selltoast" class="toast"></div>
              <div class="footerspace"></div>
             <div data-role="footer" class="footer">
                 <h2>HD금융</h2>
@@ -249,10 +252,15 @@ var step = f_down - f_up
     })
 
     $('.buybtn').click(function(){
+
         stock = $('#buystock').val().replace(/,/gi,'')
         price = $('#buystockprice').val().replace(/,/gi,'')
         code = $('#code').val()
         sellprice = $('#f_down').val().replace(/,/gi,'')
+        if(stock==''){
+            buytoast("주식 수를 확인해주세요")
+            return
+        }
         $.ajax({ url:'buyorder',
          type : 'POST',
          data : {'stock' : stock,
@@ -260,15 +268,69 @@ var step = f_down - f_up
                 'code' : code,
                 'sellprice' : sellprice},
             success:function(data){
-
+            console.log(data)
+                buytoast(data)
             }
         })
 
     })
 
+    $('.sellbtn').click(function(){
+
+        stock = $('#sellstock').val().replace(/,/gi,'')
+        price = $('#sellstockprice').val().replace(/,/gi,'')
+        code = $('#code').val()
+        buyprice = $('#f_up').val().replace(/,/gi,'')
+        if(stock==''){
+            selltoast("주식 수를 확인해주세요")
+            return
+        }
+        $.ajax({ url:'sellorder',
+         type : 'POST',
+         data : {'stock' : stock,
+                'price' : price,
+                'code' : code,
+                'buyprice' : buyprice},
+            success:function(data){
+
+                selltoast(data)
+            }
+        })
+    })
+
+
+
+
+
 
 })
+let removeToast;
+function selltoast(string) {
+    const toast = document.getElementById("selltoast");
 
+    toast.classList.contains("reveal") ?
+        (clearTimeout(removeToast), removeToast = setTimeout(function () {
+            document.getElementById("selltoast").classList.remove("reveal")
+        }, 3000)) :
+        removeToast = setTimeout(function () {
+            document.getElementById("selltoast").classList.remove("reveal")
+        }, 3000)
+    toast.classList.add("reveal"),
+        toast.innerText = string
+}
+function buytoast(string) {
+    const toast = document.getElementById("buytoast");
+
+    toast.classList.contains("reveal") ?
+        (clearTimeout(removeToast), removeToast = setTimeout(function () {
+            document.getElementById("buytoast").classList.remove("reveal")
+        }, 3000)) :
+        removeToast = setTimeout(function () {
+            document.getElementById("buytoast").classList.remove("reveal")
+        }, 3000)
+    toast.classList.add("reveal"),
+        toast.innerText = string
+}
 </script>
 
 </html>
