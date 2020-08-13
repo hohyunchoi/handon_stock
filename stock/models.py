@@ -341,3 +341,35 @@ def upwalletorderju(**key):
     finally:
         cursor.close()
         conn.close()
+
+def selstockwallet(mem_code):
+    conn = connections()
+    cursor = conn.cursor()
+    sql_sonum = "select sw_num,mem_code,code,sw_price,sw_ju,sw_orderju from stock_wallet where mem_code=:mem_code"
+    try:
+        cursor.execute(sql_sonum, mem_code=mem_code)
+    except Exception as e:
+        print('출력 오류', e)
+    finally:
+        sw = cursor.fetchall()
+        print('12121212121212121212')
+        print('sw=',sw)
+        print('mem_code=',mem_code)
+        cursor.close()
+        conn.close()
+    return sw
+
+def selstockname(code):
+    conn = connections()
+    cursor = conn.cursor()
+    sql_sonum = "select name from stock_code where code=:code"
+    try:
+        cursor.execute(sql_sonum, code=code)
+    except Exception as e:
+        print('출력 오류', e)
+    finally:
+        code = cursor.fetchall()[0][0]
+        print(code)
+        cursor.close()
+        conn.close()
+    return code

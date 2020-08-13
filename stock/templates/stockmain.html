@@ -45,19 +45,19 @@
 
                         </div>
 
-                        <div data-theme="d" data-corners="false" data-role="button" href="#portfolio">
+                        <div data-theme="d" data-corners="false" data-role="button" id="wallet">
 
-                            주식잔고
+                            주식지갑
                         </div>
 
-                        <div data-theme="d" data-corners="false" data-role="button" href="#social">
+                        <div data-theme="d" data-corners="false" data-role="button" id="order">
 
                             주식주문
                         </div>
 
                         <div data-theme="d" data-corners="false" data-role="button" href="#contact">
 
-                            관심종목
+                            계좌이체
                         </div>
 
                     </div>
@@ -82,6 +82,13 @@ $(document).ready(function(){
 
     $('#chart').click(function(){
         location.href="stockchart?sosok=0&page=1"
+    })
+
+    $('#order').click(function(){
+        location.href="stockorder"
+    })
+    $('#wallet').click(function(){
+        location.href="stockwallet"
     })
 })
 

@@ -69,8 +69,33 @@
             <div id="buytoast" class="toast"></div>
              <div class="footerspace"></div>
             <div data-role="footer" class="footer">
-                <h2>HD금융</h2>
-                <p class="copyright">&copy; Copyright 2020</p>
+                 <ul>
+                    <li>
+                        <div class="main">
+                            메인
+                        </div>
+                    </li>
+                    <li>
+                        <div class="chart">
+                            차트
+                        </div>
+                    </li>
+                    <li>
+                        <div class="wallet">
+                            지갑
+                        </div>
+                    </li>
+                    <li>
+                        <div class="thispage">
+                            주문
+                        </div>
+                    </li>
+                    <li>
+                        <div class="menu">
+                            이체
+                        </div>
+                    </li>
+                </ul>
             </div>
         </div>
 
@@ -117,8 +142,33 @@
         <div id="selltoast" class="toast"></div>
              <div class="footerspace"></div>
             <div data-role="footer" class="footer">
-                <h2>HD금융</h2>
-                <p class="copyright">&copy; Copyright 2020</p>
+                <ul>
+                    <li>
+                        <div class="main">
+                            메인
+                        </div>
+                    </li>
+                    <li>
+                        <div class="chart">
+                            차트
+                        </div>
+                    </li>
+                    <li>
+                        <div class="wallet">
+                            지갑
+                        </div>
+                    </li>
+                    <li>
+                        <div class="thispage">
+                            주문
+                        </div>
+                    </li>
+                    <li>
+                        <div class="menu">
+                            이체
+                        </div>
+                    </li>
+                </ul>
             </div>
         </div>
     <input type="hidden" id="code" value="{{code}}">
@@ -127,6 +177,23 @@
 
 
 $(document).ready(function(){
+
+$('.main').click(function(){
+    location.href = "home"
+})
+
+$('.chart').click(function(){
+    location.href = "stockchart?sosok=0&page=1"
+})
+
+$('.wallet').click(function(){
+    location.href = "stockwallet"
+})
+
+$('.order').click(function(){
+    location.href = "stockorder"
+})
+
 var code = $('#code').val()
 var f_down = $('#f_down').val().replace(/,/gi,'') * 1
 var f_up = $('#f_up').val().replace(/,/gi,'') * 1

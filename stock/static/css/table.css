@@ -144,3 +144,84 @@ width:100%;
     z-index:999;
 
 }
+.footer > ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    background-color: #333;
+
+}
+.footer > ul:after{
+    content:'';
+    display: block;
+    clear:both;
+}
+.footer > ul >li {
+    float: left;
+    width:20%;
+}
+
+.footer > ul > li > div {
+     display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+
+}
+.footer > ul > li div.active {
+    background-color: #4CAF50;
+    color: white;
+}
+.footer > ul > li div:hover:not(.active) {
+    background-color: #555;
+    color: white;
+}
+
+
+.thispage {
+    background:#555555;
+}
+
+.inner > table {
+  table-layout: fixed;
+  width: 100%;
+  margin-left: 40px;
+  border:1px solid #ccc;
+}
+.inner > table  .fix {
+  position: absolute;
+  *position: relative; /*ie7*/
+  margin-left: -161px;
+  width: 140px;
+  border-right: 1px solid #ccc;
+  margin-top:-1px;
+}
+.inner > table  td, .inner > table  th {
+  vertical-align: top;
+  border-top: 1px solid #ccc;
+  padding: 10px;
+  width: 100px;
+  background:white;
+  height:20px;
+}
+
+.outer {
+  position: relative;
+}
+.inner {
+  overflow-x: scroll;
+  overflow-y: visible;
+  width: 400px;
+  margin-left: 100px;
+}
+
+#content >.contentdiv {
+    background:white;
+    border:1px solid #eee;
+    margin-left:-17px;
+    margin-right:-17px;
+}
+
+#content > .contentdiv > div:first-child{padding-top:1px;font-size:15px;line-height:12px;color:black;}
+#content > .contentdiv > div:first-child ~ span{display:block;text-align:left;font-size:14px;color:#000}

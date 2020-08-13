@@ -203,7 +203,7 @@ text-align:center;
   margin-top:-10px;
 }
 .footerspace {
-    height:80px;
+    height:60px;
 }
 .footer {
 width:100%;
@@ -236,3 +236,42 @@ width:100%;
     visibility: visible;
     transform: translate(-50%, 0)
 }
+.footer > ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    background-color: #333;
+
+}
+.footer > ul:after{
+    content:'';
+    display: block;
+    clear:both;
+}
+.footer > ul >li {
+    float: left;
+    width:20%;
+}
+
+.footer > ul > li > div {
+     display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+
+}
+.footer > ul > li div.active {
+    background-color: #4CAF50;
+    color: white;
+}
+.footer > ul > li div:hover:not(.active) {
+    background-color: #555;
+    color: white;
+}
+
+
+.thispage {
+    background:#555555;
+}
+

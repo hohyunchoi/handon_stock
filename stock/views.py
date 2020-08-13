@@ -7,6 +7,8 @@ import pandas as pd
 from selenium import webdriver
 import requests as rq
 from django.db import transaction
+import json
+from collections import OrderedDict
 '''
 driver = webdriver.Chrome('C:\ikosmo64\chromedriver.exe')
 driver.get('https://www.ktb.co.kr/trading/popup/itemPop.jspx')
@@ -176,6 +178,7 @@ def stockdetail(request):
     sosok = request.GET['sosok']
     request.session['name'] = name
     code = models.getcode(name=name)
+    request.session['code']=code
     """df = pd.read_html('http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=13', header=0)[0]
     code = str(df[df['회사명'] == name]['종목코드'].values[0])
     code = code.zfill(6)"""
@@ -264,15 +267,22 @@ def gethogatable(request, code):
     tup = soup.select('tr.total > td.f_up')[0].text.replace("\n", "").replace('\t', "")
     dealay = soup.select('.txt_color')[0].text
     for i in range(5, 10):
-        hoga1 = int(''.join(
+        hoga1 =0
+        if ''.join(
             soup.select('#tab_con2 > table .f_down td:nth-child(1)')[i].text.replace('\n', "").replace('\t', "").replace('\xa0',"").split(
-                ',')))
-
+                ',')) != '':
+            hoga1 = int(''.join(
+                soup.select('#tab_con2 > table .f_down td:nth-child(1)')[i].text.replace('\n', "").replace('\t', "").replace('\xa0',"").split(
+                    ',')))
         hogamax.append(hoga1)
     for i in range(0, 5):
-        hoga2 = int(''.join(
-            soup.select('#tab_con2 > table .f_up td:nth-child(3)')[i].text.replace('\n', "").replace('\t', "").split(
-                ',')))
+        hoga2 =0
+        if ''.join(
+            soup.select('#tab_con2 > table .f_up td:nth-child(3)')[i].text.replace('\n', "").replace('\t', "").replace('\xa0',"").split(
+                ',')) !='':
+            hoga2 = int(''.join(
+                soup.select('#tab_con2 > table .f_up td:nth-child(3)')[i].text.replace('\n', "").replace('\t', "").replace('\xa0',"").split(
+                    ',')))
 
         hogamax.append(hoga2)
     hogatable = '<table class="hoga"><thead><tr><td>매도잔량</td><td>호가</td><td>매수잔량</td></tr><thead><tfoot><tr><td>' + tdown + '</td><td>잔량합계<br><span>' + dealay + '</span></td><td>' + tup + '</td></tr></tfoot><tbody>'
@@ -283,12 +293,14 @@ def gethogatable(request, code):
         hogatable += '<tr class="f_down"><td><div class="grp"><div style="width:' + str(
             int((int(hogamax[i - 5]) / max(hogamax)) * 100)) + '%;">' + str(
             hoga1) + '</div></div></td><td>' + str(hoga2) + '</td><td></td></tr>'
+
     for i in range(0, 5):
         hoga1 = soup.select('#tab_con2 > table .f_up td:nth-child(2)')[i].text
         hoga2 = soup.select('#tab_con2 > table .f_up td:nth-child(3)')[i].text
-        hogatable += '<tr class="f_up"><td></td><td>' + str(
-            hoga1) + '</td><td><div class="grp"><div style="width:' + str(
-            int((hogamax[i + 5] / max(hogamax)) * 100)) + '%;">' + str(hoga2) + '</div></td></tr>'
+        if hogamax[i+5] != '':
+            hogatable += '<tr class="f_up"><td></td><td>' + str(
+                hoga1) + '</td><td><div class="grp"><div style="width:' + str(
+                int((hogamax[i + 5] / max(hogamax)) * 100)) + '%;">' + str(hoga2) + '</div></td></tr>'
     hogatable += '</tbody></table>'
     request.session['hogatable'] = hogatable
     return hogatable
@@ -297,7 +309,7 @@ def gethogatable(request, code):
 def order(request):
     name = request.session['name']
     sosok = request.session['sosok']
-    code = request.GET['code']
+    code = request.session['code']
     hogatable = gethogatable(request, code)
     soup = bs(hogatable, 'html.parser')
     f_down = soup.select('.f_down td:nth-child(2)')[4].text
@@ -572,3 +584,124 @@ def sellorder(request):
     if msg2 != '':
         msg += "\n"+str(stocktoast2)+msg2
     return render(request, "orderserver.html",{"msg":msg})
+
+def stockwallet(request):
+    mem_code = request.session['user'][0]
+    print(mem_code)
+    stockwallet = models.selstockwallet(mem_code)
+    print(stockwallet)
+    sw =[]
+    for i in stockwallet:
+        name = models.selstockname(i[2])
+        url = 'https://finance.naver.com/item/main.nhn?code=' + i[2]
+        site = rq.get(url)
+        site2 = site.content.decode('euc-kr')
+        soup = bs(site2, 'html.parser')
+        updown = soup.select('.no_exday .ico')[0].text
+        color = ''
+        priceupdown = soup.select('.no_exday .blind')[0].text
+        priceper = soup.select('.no_exday .blind')[1].text
+        nowcolor = ''
+
+
+        price = soup.select('.no_today .blind')[0].text
+        value = i[4] * int(priceupdown.replace(",",""))
+        nowprice = i[4]*int(price.replace(",",""))
+        nowpriceper = round(((nowprice/i[3])*100) - 100,2)
+        if nowprice > i[3]:
+            nowcolor = "red"
+            #value = '▲' + str(value)
+            nowpriceper = '+'+str(nowpriceper)+'%'
+        elif nowprice < i[3]:
+            nowcolor ="blue"
+            #value = '▼' + str(value)
+            nowpriceper =  str(nowpriceper) + '%'
+        else:
+            nowcolor="black"
+
+        if updown == '상승':
+            priceper = '+' + priceper + '%'
+            #priceupdown = '▲' + priceupdown
+            color = 'red'
+        elif updown == '하락':
+            priceper = '-' + priceper + '%'
+            color = 'blue'
+            #priceupdown = '▼' + priceupdown
+        else:
+            color = 'black'
+
+
+        print('가격')
+        print(price)
+        stock = {"sw_num":i[0],"code":i[2],"sw_price":i[3],"sw_ju":i[4],"sw_orderju":i[5],"name":name,"priceper":priceper,"priceupdown":priceupdown,"value":value,
+                 "color":color,"price":price,"nowprice":nowprice,"nowpriceper":nowpriceper,"nowcolor":nowcolor}
+        sw.append(stock)
+    print(sw)
+    return render(request,"stockwallet.html",{"sw":sw})
+
+def stockwallet_ajax(request):
+    mem_code = request.session['user'][0]
+    print(mem_code)
+    stockwallet = models.selstockwallet(mem_code)
+    print(stockwallet)
+    sw = []
+    for i in stockwallet:
+        name = models.selstockname(i[2])
+        url = 'https://finance.naver.com/item/main.nhn?code=' + i[2]
+        site = rq.get(url)
+        site2 = site.content.decode('euc-kr')
+        soup = bs(site2, 'html.parser')
+        updown = soup.select('.no_exday .ico')[0].text
+        color = ''
+        priceupdown = soup.select('.no_exday .blind')[0].text
+        priceper = soup.select('.no_exday .blind')[1].text
+        nowcolor = ''
+
+        price = soup.select('.no_today .blind')[0].text
+        value = i[4] * int(priceupdown.replace(",", ""))
+        nowprice = i[4] * int(price.replace(",", ""))
+        nowpriceper = round(((nowprice / i[3]) * 100) - 100, 2)
+        if nowprice > i[3]:
+            nowcolor = "red"
+            #value = '▲' + str(value)
+            nowpriceper = '+' + str(nowpriceper) + '%'
+        elif nowprice < i[3]:
+            nowcolor = "blue"
+            #value = '▼' + str(value)
+            nowpriceper = str(nowpriceper) + '%'
+        else:
+            nowcolor = "black"
+
+        if updown == '상승':
+            priceper = '+' + priceper + '%'
+            #priceupdown = '▲' + priceupdown
+            color = 'red'
+        elif updown == '하락':
+            priceper = '-' + priceper + '%'
+            color = 'blue'
+            #priceupdown = '▼' + priceupdown
+        else:
+            color = 'black'
+
+        print('가격')
+        print(price)
+        #stock = OrderedDict()
+        #stock["priceper"]= priceper
+        #stock["priceupdown"] =priceupdown
+        #stock["value"] =value
+        #stock["color"] =color
+        #stock["price"] =price
+        #stock["nowprice"] =nowprice
+        #stock["nowpriceper"] =nowpriceper
+        #stock["nowcolor"] =nowcolor
+        #stock = json.dumps(stock)
+        stock = {"priceper": priceper, "priceupdown": priceupdown, "value": value,
+                "color": color, "price": price, "nowprice": nowprice, "nowpriceper": nowpriceper, "nowcolor": nowcolor}
+        print("**********************************")
+        print(stock)
+        print(type(stock))
+        sw.append(stock)
+
+    sw = json.dumps(sw)
+    print(sw)
+    return  render(request,"stockwalletserver.html",{"sw":sw})

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        {% load static %}
+        {% static "" as baseUrl %}
+        <title>HD주식 로그인</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="keywords" content="mobile portfolio, mobile portfolio site">
+        <meta name="author" content="kimsh">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="{% static 'js/jquery-1.8.3.min.js'%}"></script>
+        <script src="{% static 'js/jquery.mobile-1.2.0.min.js'%}"></script>
+        <link href="{% static 'css/jquery.mobile.structure-1.2.0.min.css'%}" rel="stylesheet">
+        <link href="{% static 'css/jquery.mobile.theme-1.2.0.min.css'%}" rel="stylesheet">
+        <link href="{% static 'css/jquery.mobile-1.2.0.min.css'%}" rel="stylesheet">
+        <link href="{% static 'css/photoswipe.css'%}" rel="stylesheet">
+        <link href="{% static 'css/style.css'%}" rel="stylesheet">
+        <link href="{% static 'css/table.css'%}" rel="stylesheet">
+        <link href="{% static 'css/templates.css'%}" rel="stylesheet">
+        <script src="{% static 'js/script.js'%}"></script>
+        <script src="{% static 'js/settings.js'%}"></script>
+        <script src="{% static 'js/klass.min.js'%}"></script>
+        <script src="{% static 'js/code.photoswipe.jquery-3.0.5.min.js'%}"></script>
+    </head>
+
+    <body>
+
+
+          <div class="headerspace"></div>
+            <div data-role="header" class="header">
+                <h1>HD주식</h1>
+            </div>
+
+            <div data-role="content" id="content">
+                <div class="contentdiv">주식지갑</div>
+                <div class="contentdiv"><div>평가손익</div> <span></span></div>
+                <div class="contentdiv"><div>평가금액</div> <span></span></div>
+                <div class="outer">
+                  <div class="inner">
+                    <table>
+                        <thead>
+                            <th class="fix">종목명</th>
+                            <th>평가손익</th>
+                            <th>수익률</th>
+                            <th>평가금액</th>
+                            <th>매수금액</th>
+                            <th>보유수량</th>
+                            <th>가능수량</th>
+                            <th>현재가</th>
+                            <th>전일대비</th>
+                            <th>등락률</th>
+                            <th></th>
+                        </thead>
+                        <tbody>
+                        {% for e in sw %}
+                            <tr>
+                              <td class="fix">{{e.name}}</td>
+                              <td style="color:{{e.nowcolor}}">{{e.value}}</td>
+                              <td style="color:{{e.nowcolor}}">{{e.nowpriceper}}</td>
+                              <td style="color:{{e.nowcolor}}">{{e.nowprice}}</td>
+                              <td>{{e.sw_price}}</td>
+                              <td>{{e.sw_ju}}</td>
+                              <td>{{e.sw_orderju}}</td>
+                              <td style="color:{{e.color}}">{{e.price}}</td>
+                              <td style="color:{{e.color}}">{{e.priceupdown}}</td>
+                              <td style="color:{{e.color}}">{{e.priceper}}</td>
+                              <td></td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+
+                    </table>
+                  </div>
+                </div>
+            </div>
+
+        <div class="footerspace"></div>
+            <div data-role="footer" class="footer">
+                <ul>
+                    <li>
+                        <div class="main">
+                            메인
+                        </div>
+                    </li>
+                    <li>
+                        <div class="chart">
+                            차트
+                        </div>
+                    </li>
+                    <li>
+                        <div class="thispage">
+                            지갑
+                        </div>
+                    </li>
+                    <li>
+                        <div class="order">
+                            주문
+                        </div>
+                    </li>
+                    <li>
+                        <div class="menu">
+                            이체
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+<input type="hidden" id="page" name="page" value="{{page}}">
+    </body>
+<script>
+
+
+$('.main').click(function(){
+    location.href = "home"
+})
+
+$('.chart').click(function(){
+    location.href = "stockchart?sosok=0&page=1"
+})
+
+$('.wallet').click(function(){
+    location.href = "stockwallet"
+})
+
+$('.order').click(function(){
+    location.href = "stockorder"
+})
+
+
+
+playAlert = setInterval(function() {
+
+   $.ajax({ url:'stockwallet_ajax',
+    success:function(data){
+        data= data.replace(/&#x27;/gi,'\'').replace(/&quot;/gi,'"')
+        data_json = JSON.parse(data)
+        $('tbody > tr').each(function(index, value) {
+            $(this).children('td:nth-child(2)').text(data_json[index].value)
+            $(this).children('td:nth-child(3)').text(data_json[index].nowpriceper)
+            $(this).children('td:nth-child(4)').text(data_json[index].nowprice)
+            $(this).children('td:nth-child(8)').text(data_json[index].price)
+            $(this).children('td:nth-child(9)').text(data_json[index].priceupdown)
+            $(this).children('td:nth-child(10)').text(data_json[index].priceper)
+            $(this).children('td:nth-child(2)').css("color",data_json[index].nowcolor)
+            $(this).children('td:nth-child(3)').css("color",data_json[index].nowcolor)
+            $(this).children('td:nth-child(4)').css("color",data_json[index].nowcolor)
+            $(this).children('td:nth-child(8)').css("color",data_json[index].color)
+            $(this).children('td:nth-child(9)').css("color",data_json[index].color)
+            $(this).children('td:nth-child(10)').css("color",data_json[index].color)
+
+        });
+
+
+
+    },error : function(xhr, status, error) {
+
+                 alert(error);
+
+           }
+
+
+
+    })
+
+}, 3000);
+
+
+
+</script>
+
+</html>

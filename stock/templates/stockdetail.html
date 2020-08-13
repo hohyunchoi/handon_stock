@@ -36,14 +36,57 @@
             </div>
         <div class="footerspace"></div>
             <div data-role="footer" class="footer">
-                <h2>HD금융</h2>
-                <p class="copyright">&copy; Copyright 2020</p>
+                 <ul>
+                    <li>
+                        <div class="main">
+                            메인
+                        </div>
+                    </li>
+                    <li>
+                        <div class="chart">
+                            차트
+                        </div>
+                    </li>
+                    <li>
+                        <div class="wallet">
+                            지갑
+                        </div>
+                    </li>
+                    <li>
+                        <div class="order">
+                            주문
+                        </div>
+                    </li>
+                    <li>
+                        <div class="menu">
+                            이체
+                        </div>
+                    </li>
+                </ul>
             </div>
 
     <input type="hidden" id="code" value="{{code}}">
     </body>
 <script>
 $(document).ready(function(){
+$('.main').click(function(){
+    location.href = "home"
+})
+
+$('.chart').click(function(){
+    location.href = "stockchart?sosok=0&page=1"
+})
+
+$('.wallet').click(function(){
+    location.href = "stockwallet"
+})
+
+$('.order').click(function(){
+    location.href = "stockorder"
+})
+
+
+
 var code = $('#code').val()
     $.ajax({ url:'stocktoday?code='+code,
     success:function(data){
@@ -52,7 +95,7 @@ var code = $('#code').val()
         $('#content').html(data)
 
         $('#order').on('click',function(){
-                 location.href = 'stockorder?code='+code
+                 location.href = 'stockorder'
 
         })
 
