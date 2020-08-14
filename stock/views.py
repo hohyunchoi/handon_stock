@@ -4,11 +4,12 @@ from stock import models
 from django.views.decorators.csrf import csrf_exempt
 from bs4 import BeautifulSoup as bs
 import pandas as pd
-from selenium import webdriver
 import requests as rq
 from django.db import transaction
 import json
 from collections import OrderedDict
+
+from selenium import webdriver
 '''
 driver = webdriver.Chrome('C:\ikosmo64\chromedriver.exe')
 driver.get('https://www.ktb.co.kr/trading/popup/itemPop.jspx')
