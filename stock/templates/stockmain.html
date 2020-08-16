@@ -4,7 +4,7 @@
     <head>
         {% load static %}
         {% static "" as baseUrl %}
-        <title>Mobile Portfolio</title>
+        <title>HD주식</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="keywords" content="mobile portfolio, mobile portfolio site">
         <meta name="author" content="kimsh">
@@ -16,8 +16,8 @@
         <link href="{% static 'css/jquery.mobile.theme-1.2.0.min.css'%}" rel="stylesheet">
         <link href="{% static 'css/jquery.mobile-1.2.0.min.css'%}" rel="stylesheet">
         <link href="{% static 'css/photoswipe.css'%}" rel="stylesheet">
+        <link href="{% static 'css/detail.css'%}" rel="stylesheet">
         <link href="{% static 'css/style.css'%}" rel="stylesheet">
-        <link href="{% static 'css/templates.css'%}" rel="stylesheet">
         <script src="{% static 'js/script.js'%}"></script>
         <script src="{% static 'js/settings.js'%}"></script>
         <script src="{% static 'js/klass.min.js'%}"></script>
@@ -61,10 +61,9 @@
                         </div>
 
                     </div>
-                {{profile}}
-                <a href="logout" id="logout">logout</a>
+                <a id="logout">logout</a>
             </div>
-             <div class="footerspace"></div>
+            <div class="footerspace"></div>
             <div data-role="footer" class="footer">
                 <h2>HD금융</h2>
                 <p class="copyright">&copy; Copyright 2020</p>
@@ -89,6 +88,10 @@ $(document).ready(function(){
     })
     $('#wallet').click(function(){
         location.href="stockwallet"
+    })
+
+    $('#logout').click(function(){
+        location.href="logout"
     })
 })
 
