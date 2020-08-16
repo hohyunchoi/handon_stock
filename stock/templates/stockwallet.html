@@ -34,8 +34,12 @@
 
             <div data-role="content" id="content">
                 <div class="contentdiv">주식지갑</div>
-                <div class="contentdiv"><div>평가손익</div> <span></span></div>
-                <div class="contentdiv"><div>평가금액</div> <span></span></div>
+                <ul class="total_lst">
+                    <li style="padding:0px 15px 0px 15px"><div>평가손익</div><span class="realupdown" style="color:{{realcolor}}">{{realupdown}}   {{realupdownper}}%</span></li>
+                    <li style="padding:0px 15px 0px 15px"><div>평가금액</div><span class="realprice" >{{realprice}}</span></li>
+
+                </ul>
+
                 <div class="outer">
                   <div class="inner">
                     <table>
@@ -129,16 +133,24 @@ $('.order').click(function(){
 
 
 
+
 playAlert = setInterval(function() {
 
    $.ajax({ url:'stockwallet_ajax',
     success:function(data){
         data= data.replace(/&#x27;/gi,'\'').replace(/&quot;/gi,'"')
         data_json = JSON.parse(data)
+        realprice = 0
+        buyprice = 0
         $('tbody > tr').each(function(index, value) {
-            $(this).children('td:nth-child(2)').text(data_json[index].value)
+            realprice += data_json[index].nowprice
+            buyprice += $(this).children('td:nth-child(5)').text().replace(/,/g,'')*1
+            value = data_json[index].value+""
+            nowprice =data_json[index].nowprice+""
+
+            $(this).children('td:nth-child(2)').text(value.replace(/\B(?=(\d{3})+(?!\d))/g, ","))
             $(this).children('td:nth-child(3)').text(data_json[index].nowpriceper)
-            $(this).children('td:nth-child(4)').text(data_json[index].nowprice)
+            $(this).children('td:nth-child(4)').text(nowprice.replace(/\B(?=(\d{3})+(?!\d))/g, ","))
             $(this).children('td:nth-child(8)').text(data_json[index].price)
             $(this).children('td:nth-child(9)').text(data_json[index].priceupdown)
             $(this).children('td:nth-child(10)').text(data_json[index].priceper)
@@ -150,8 +162,21 @@ playAlert = setInterval(function() {
             $(this).children('td:nth-child(10)').css("color",data_json[index].color)
 
         });
+        realupdown = realprice - buyprice
+        realcolor = "black"
+        if(realupdown > 0){
+            realcolor = "red"
+        }else if(realupdown < 0){
+            realcolor = "blue"
+        }
+        realpriceper = ((realupdown/buyprice)*100).toFixed(2)
 
-
+        realprice = realprice+""
+        realupdown = realupdown+""
+        realpriceper = realpriceper+""
+        $('.realupdown').text(realupdown.replace(/\B(?=(\d{3})+(?!\d))/g, ",")+'  '+realpriceper+"%")
+        $('.realupdown').css("color",realcolor)
+        $('.realprice').text(realprice.replace(/\B(?=(\d{3})+(?!\d))/g, ","))
 
     },error : function(xhr, status, error) {
 
@@ -164,6 +189,7 @@ playAlert = setInterval(function() {
     })
 
 }, 3000);
+
 
 
 

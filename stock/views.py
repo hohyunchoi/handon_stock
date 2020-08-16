@@ -381,43 +381,21 @@ def buyorder(requset):
             #같은 가격의 판매 주문이 있다면 매칭
             else:
                 print('거래 매치!!!!')
-                # 주문량이 있는 판매주문량보다 많을 경우
                 print(' 주문량이 판매량보다 많음!')
                 if stock >= sellstock[0][1]:
-                    # 주문량 - 판매주문량
                     stock = stock - sellstock[0][1]
-                    # 판매 주문 삭제
                     models.delorder(so_num=sellstock[0][0])
-                    # 로그남기기
                     models.addlog(code=code, buy_mem=mem_code,sell_mem=sellstock[0][3], stock=sellstock[0][1], price=price*sellstock[0][1])
-                    # 주식있는지 없는지
                     if models.checkwallet(code=code,mem_code=mem_code) == 1:
-                        #기존 주식에 추가
-                        print('기존주식에 추가!')
                         models.updatestock(code=code,stock=sellstock[0][1],mem_code=mem_code,price=sellstock[0][1]*price)
-                    #없으면
                     else:
-                        print('새로운 주식 추가!')
-                        #새로운 주식 추가
                         models.addstock(code=code,mem_code=mem_code,stock=sellstock[0][1],price=sellstock[0][1]*price)
-                    # 판매자 주식지갑 주식 빠져나감
-                    #판매자 지갑에 주식수
-                    print('판매자 지갑에 있는 주식 수 가져오기!')
                     sw_ju = models.selwalletstock(mem_code=sellstock[0][3],code=code)[0][0]
-                    print(sw_ju)
-                    # 판매자 지갑에 있는 주식이 0개가 된다면
                     if (sw_ju - stock) == 0:
-                        print('0개!!')
-                        # 주식 삭제
                         models.delwalletstock(code=code)
                     else:
-                        print('0개 아님!!')
-                        # 주식 업데이트
                         models.upwalletstock(code=code,mem_code=sellstock[0][3],stock=sellstock[0][1])
-                    # 구매자 돈 빠져나가고
-                    print('돈나가요!')
                     models.accountout(price=sellstock[0][1] * price, mem_code=mem_code)
-                    # 판매자 돈 들어옴
                     models.accountin(price=sellstock[0][1] * price, mem_code=sellstock[0][3])
                     stocktoast1 += sellstock[0][1]
                     msg1 = "주 구매 완료."
@@ -592,6 +570,8 @@ def stockwallet(request):
     stockwallet = models.selstockwallet(mem_code)
     print(stockwallet)
     sw =[]
+    realprice = 0
+    buyprice = 0
     for i in stockwallet:
         name = models.selstockname(i[2])
         url = 'https://finance.naver.com/item/main.nhn?code=' + i[2]
@@ -634,11 +614,20 @@ def stockwallet(request):
 
         print('가격')
         print(price)
-        stock = {"sw_num":i[0],"code":i[2],"sw_price":i[3],"sw_ju":i[4],"sw_orderju":i[5],"name":name,"priceper":priceper,"priceupdown":priceupdown,"value":value,
-                 "color":color,"price":price,"nowprice":nowprice,"nowpriceper":nowpriceper,"nowcolor":nowcolor}
+        realprice += nowprice
+        buyprice += i[3]
+        stock = {"sw_num":i[0],"code":i[2],"sw_price":format(i[3],','),"sw_ju":i[4],"sw_orderju":i[5],"name":name,"priceper":priceper,"priceupdown":priceupdown,"value":format(value,','),
+                 "color":color,"price":price,"nowprice":format(nowprice,','),"nowpriceper":nowpriceper,"nowcolor":nowcolor}
         sw.append(stock)
     print(sw)
-    return render(request,"stockwallet.html",{"sw":sw})
+    realupdown = realprice - buyprice
+    realupdownper = round(((realprice - buyprice)/buyprice)*100,2)
+    realcolor = 'black'
+    if realupdown < 0:
+        realcolor = "blue"
+    elif realupdown > 0:
+        realcolor ="red"
+    return render(request,"stockwallet.html",{"sw":sw,"realprice":format(realprice,','),"realupdown":format(realupdown,','),"realupdownper":realupdownper,"realcolor":realcolor})
 
 def stockwallet_ajax(request):
     mem_code = request.session['user'][0]
@@ -646,6 +635,9 @@ def stockwallet_ajax(request):
     stockwallet = models.selstockwallet(mem_code)
     print(stockwallet)
     sw = []
+    realprice = 0
+    buyprice = 0
+
     for i in stockwallet:
         name = models.selstockname(i[2])
         url = 'https://finance.naver.com/item/main.nhn?code=' + i[2]
@@ -684,8 +676,6 @@ def stockwallet_ajax(request):
         else:
             color = 'black'
 
-        print('가격')
-        print(price)
         #stock = OrderedDict()
         #stock["priceper"]= priceper
         #stock["priceupdown"] =priceupdown
@@ -698,9 +688,6 @@ def stockwallet_ajax(request):
         #stock = json.dumps(stock)
         stock = {"priceper": priceper, "priceupdown": priceupdown, "value": value,
                 "color": color, "price": price, "nowprice": nowprice, "nowpriceper": nowpriceper, "nowcolor": nowcolor}
-        print("**********************************")
-        print(stock)
-        print(type(stock))
         sw.append(stock)
 
     sw = json.dumps(sw)
