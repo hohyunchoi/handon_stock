@@ -91,7 +91,7 @@ def getcode(**key):
     except Exception as e:
         print('출력 오류', e)
     finally:
-        code = cursor.fetchall()[0][0]
+        code = cursor.fetchall()
         print('code=',code)
         cursor.close()
         conn.close()

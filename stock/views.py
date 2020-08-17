@@ -176,17 +176,36 @@ def paging(request):
 
 def stockdetail(request):
     name = request.GET['name']
-    sosok = request.GET['sosok']
-    request.session['name'] = name
+
     code = models.getcode(name=name)
-    request.session['code']=code
+    if code == []:
+        return render(request, "stockmain.html",{"msg":"이름을 확인해주세요."})
+    else:
+        code = code[0][0]
+    request.session['code'] = code
+    sosok=''
+    if "sosok" in request.GET:
+        sosok = request.GET['sosok']
+
+    else:
+        url = 'https://finance.naver.com/item/main.nhn?code='+code
+        site = rq.get(url)
+        site2 = site.content.decode('euc-kr')
+        soup = bs(site2, 'html.parser')
+        if soup.select('.kospi')==[]:
+            sosok = 'KOSDAQ'
+        else:
+            sosok = 'KOSPI'
+        print('code?=',code)
+    request.session['name'] = name
+
     """df = pd.read_html('http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=13', header=0)[0]
     code = str(df[df['회사명'] == name]['종목코드'].values[0])
     code = code.zfill(6)"""
     if sosok == '0':
         sosok = 'KOSPI'
-    else:
-        sosok = 'KOSDAK'
+    elif sosok =='1':
+        sosok = 'KOSDAQ'
     request.session['sosok'] = sosok
 
     return render(request, "stockdetail.html", {"name": name, "code": code, 'sosok': sosok})

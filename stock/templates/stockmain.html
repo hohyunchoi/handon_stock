@@ -31,6 +31,11 @@
                 <h1>HD주식</h1>
             </div>
             <div data-role="content">
+                <div class="row">
+                    <div class="col-1"></div>
+                <input class="col-8" type="text" id="searchname"> <input class="col-3" type="button" id="searchbtn" value="검색">
+                    </div>
+                <p style="color:red;margin:0;" id="msg" class="msg">{{msg}}</p>
                 <div class="pt-menu">
                         <div data-theme="d" data-corners="false" data-role="button" href="#profile" style="width:260px">
                             <div id="account">
@@ -92,6 +97,14 @@ $(document).ready(function(){
 
     $('#logout').click(function(){
         location.href="logout"
+    })
+
+    $('.ui-btn-corner-all').click(function(){
+        if($('#searchname').val() == ''){
+            $('#msg').text('이름을 확인해주세요.')
+        }else{
+            location.href="stockdetail?name="+$('#searchname').val()
+        }
     })
 })
 
