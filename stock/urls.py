@@ -31,4 +31,5 @@ urlpatterns = [
     path("sellorder",views.sellorder),
     path("stockwallet",views.stockwallet),
     path("stockwallet_ajax",views.stockwallet_ajax),
+    path("createaccount",views.createaccount,name="createaccount")
 ]

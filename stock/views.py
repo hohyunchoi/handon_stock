@@ -8,7 +8,7 @@ import requests as rq
 from django.db import transaction
 import json
 from collections import OrderedDict
-
+import random
 from selenium import webdriver
 '''
 driver = webdriver.Chrome('C:\ikosmo64\chromedriver.exe')
@@ -58,6 +58,27 @@ def login(request):
                 return render(request, "loginform.html", {"msg": msg})
         else:
             return render(request, "loginform.html")
+
+@csrf_exempt
+@transaction.atomic
+def createaccount(request):
+    if request.method == 'POST':
+        ac_pwd = request.POST['pw1']
+        ac_name = request.POST['name']
+        a = 1
+        ac_num = "100"
+        while a==1:
+            for i in range(1, 8):
+                ac_num += str(random.randrange(0, 10))
+            a = models.selac_num(ac_num=ac_num)
+        models.addaccount(ac_num=ac_num,ac_name=ac_name,ac_pwd=ac_pwd)
+
+        ac_code = models.selac_code(ac_num=ac_num)
+        models.addaccountclient(ac_code=ac_code,mem_code=request.session['user'][0])
+        request.session['account'] = models.account(mem_code=request.session['user'][0])[0]
+        return redirect("home")
+    else:
+        return render(request,"createaccount.html")
 
 
 @csrf_exempt
@@ -327,9 +348,14 @@ def gethogatable(request, code):
 
 
 def order(request):
-    name = request.session['name']
-    sosok = request.session['sosok']
-    code = request.session['code']
+    if "name" in request.session:
+        name = request.session['name']
+        sosok = request.session['sosok']
+        code = request.session['code']
+    else:
+        name = '삼성전자'
+        sosok = 'KOSPI'
+        code = '005930'
     hogatable = gethogatable(request, code)
     soup = bs(hogatable, 'html.parser')
     f_down = soup.select('.f_down td:nth-child(2)')[4].text
@@ -589,64 +615,77 @@ def stockwallet(request):
     stockwallet = models.selstockwallet(mem_code)
     print(stockwallet)
     sw =[]
+    stockwalletcount = models.selcountwallet(mem_code)
     realprice = 0
     buyprice = 0
-    for i in stockwallet:
-        name = models.selstockname(i[2])
-        url = 'https://finance.naver.com/item/main.nhn?code=' + i[2]
-        site = rq.get(url)
-        site2 = site.content.decode('euc-kr')
-        soup = bs(site2, 'html.parser')
-        updown = soup.select('.no_exday .ico')[0].text
-        color = ''
-        priceupdown = soup.select('.no_exday .blind')[0].text
-        priceper = soup.select('.no_exday .blind')[1].text
-        nowcolor = ''
+    print("****************************")
+    print(stockwalletcount)
+    if stockwalletcount >= 1:
+        for i in stockwallet:
+            name = models.selstockname(i[2])
+            url = 'https://finance.naver.com/item/main.nhn?code=' + i[2]
+            site = rq.get(url)
+            site2 = site.content.decode('euc-kr')
+            soup = bs(site2, 'html.parser')
+            updown = soup.select('.no_exday .ico')[0].text
+            color = ''
+            priceupdown = soup.select('.no_exday .blind')[0].text
+            priceper = soup.select('.no_exday .blind')[1].text
+            nowcolor = ''
 
 
-        price = soup.select('.no_today .blind')[0].text
-        value = i[4] * int(priceupdown.replace(",",""))
-        nowprice = i[4]*int(price.replace(",",""))
-        nowpriceper = round(((nowprice/i[3])*100) - 100,2)
-        if nowprice > i[3]:
-            nowcolor = "red"
-            #value = '▲' + str(value)
-            nowpriceper = '+'+str(nowpriceper)+'%'
-        elif nowprice < i[3]:
-            nowcolor ="blue"
-            #value = '▼' + str(value)
-            nowpriceper =  str(nowpriceper) + '%'
-        else:
-            nowcolor="black"
+            price = soup.select('.no_today .blind')[0].text
+            print("프라이스느느느은으능느은",priceupdown)
+            print(i[3])
+            nowprice = i[4]*int(price.replace(",",""))
+            value = nowprice - i[3]
+            nowpriceper = round(((nowprice/i[3])*100) - 100,2)
+            if nowprice > i[3]:
+                nowcolor = "red"
+                #value = '▲' + str(value)
+                nowpriceper = '+'+str(nowpriceper)+'%'
+            elif nowprice < i[3]:
+                nowcolor ="blue"
+                #value = '▼' + str(value)
+                nowpriceper =  str(nowpriceper) + '%'
+            else:
+                nowcolor="black"
 
-        if updown == '상승':
-            priceper = '+' + priceper + '%'
-            #priceupdown = '▲' + priceupdown
-            color = 'red'
-        elif updown == '하락':
-            priceper = '-' + priceper + '%'
-            color = 'blue'
-            #priceupdown = '▼' + priceupdown
-        else:
-            color = 'black'
+            if updown == '상승':
+                priceper = '+' + priceper + '%'
+                #priceupdown = '▲' + priceupdown
+                color = 'red'
+            elif updown == '하락':
+                priceper = '-' + priceper + '%'
+                color = 'blue'
+                #priceupdown = '▼' + priceupdown
+            else:
+                color = 'black'
 
 
-        print('가격')
-        print(price)
-        realprice += nowprice
-        buyprice += i[3]
-        stock = {"sw_num":i[0],"code":i[2],"sw_price":format(i[3],','),"sw_ju":i[4],"sw_orderju":i[5],"name":name,"priceper":priceper,"priceupdown":priceupdown,"value":format(value,','),
-                 "color":color,"price":price,"nowprice":format(nowprice,','),"nowpriceper":nowpriceper,"nowcolor":nowcolor}
-        sw.append(stock)
-    print(sw)
-    realupdown = realprice - buyprice
-    realupdownper = round(((realprice - buyprice)/buyprice)*100,2)
-    realcolor = 'black'
-    if realupdown < 0:
-        realcolor = "blue"
-    elif realupdown > 0:
-        realcolor ="red"
-    return render(request,"stockwallet.html",{"sw":sw,"realprice":format(realprice,','),"realupdown":format(realupdown,','),"realupdownper":realupdownper,"realcolor":realcolor})
+            print('가격')
+            print(price)
+            realprice += nowprice
+            buyprice += i[3]
+            stock = {"sw_num":i[0],"code":i[2],"sw_price":format(i[3],','),"sw_ju":i[4],"sw_orderju":i[5],"name":name,"priceper":priceper,"priceupdown":priceupdown,"value":format(value,','),
+                     "color":color,"price":price,"nowprice":format(nowprice,','),"nowpriceper":nowpriceper,"nowcolor":nowcolor}
+            sw.append(stock)
+        print(sw)
+        realupdown = 0
+        realupdownper = 0
+        print("리얼 프라이스!!!!!",realprice)
+        print("바이 프라이스!!!!!",buyprice)
+
+        realupdown = realprice - buyprice
+        realupdownper = round(((realprice - buyprice)/buyprice)*100,2)
+        realcolor = 'black'
+        if realupdown < 0:
+            realcolor = "blue"
+        elif realupdown > 0:
+            realcolor ="red"
+        return render(request,"stockwallet.html",{"sw":sw,"realprice":format(realprice,','),"realupdown":format(realupdown,','),"realupdownper":realupdownper,"realcolor":realcolor})
+    else:
+        return render(request, "stockwallet.html")
 
 def stockwallet_ajax(request):
     mem_code = request.session['user'][0]
@@ -670,9 +709,10 @@ def stockwallet_ajax(request):
         nowcolor = ''
 
         price = soup.select('.no_today .blind')[0].text
-        value = i[4] * int(priceupdown.replace(",", ""))
+
         nowprice = i[4] * int(price.replace(",", ""))
         nowpriceper = round(((nowprice / i[3]) * 100) - 100, 2)
+        value = nowprice - i[3]
         if nowprice > i[3]:
             nowcolor = "red"
             #value = '▲' + str(value)
@@ -705,6 +745,7 @@ def stockwallet_ajax(request):
         #stock["nowpriceper"] =nowpriceper
         #stock["nowcolor"] =nowcolor
         #stock = json.dumps(stock)
+
         stock = {"priceper": priceper, "priceupdown": priceupdown, "value": value,
                 "color": color, "price": price, "nowprice": nowprice, "nowpriceper": nowpriceper, "nowcolor": nowcolor}
         sw.append(stock)

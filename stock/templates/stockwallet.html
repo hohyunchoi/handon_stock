@@ -77,6 +77,9 @@
                     </table>
                   </div>
                 </div>
+                <div>
+                    옆으로 넘겨보세요!
+                </div>
             </div>
 
         <div class="footerspace"></div>
@@ -174,6 +177,9 @@ playAlert = setInterval(function() {
         realprice = realprice+""
         realupdown = realupdown+""
         realpriceper = realpriceper+""
+        if(realpriceper == 'NaN'){
+            realpriceper = "0.00"
+        }
         $('.realupdown').text(realupdown.replace(/\B(?=(\d{3})+(?!\d))/g, ",")+'  '+realpriceper+"%")
         $('.realupdown').css("color",realcolor)
         $('.realprice').text(realprice.replace(/\B(?=(\d{3})+(?!\d))/g, ","))
@@ -188,7 +194,7 @@ playAlert = setInterval(function() {
 
     })
 
-}, 3000);
+}, 4000);
 
 
 

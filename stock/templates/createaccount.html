@@ -4,7 +4,7 @@
     <head>
         {% load static %}
         {% static "" as baseUrl %}
-        <title>HD주식 로그인</title>
+        <title>HD주식</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="keywords" content="mobile portfolio, mobile portfolio site">
         <meta name="author" content="kimsh">
@@ -36,21 +36,25 @@
                     <table width="100%">
                         <thead>
                             <tr>
-                                <th colspan="2">로그인</th>
+                                <th colspan="2">주식계좌 생성</th>
                             </tr>
                         </thead>
                         <tfoot>
-                            <tr><th colspan="2"><input type="button" onclick="login()" value="로그인">
-                            <input type="button" value="회원가입" ></th></tr>
+                            <tr><th colspan="2"><input type="button" onclick="createaccount()" value="계좌생성">
+                            </th></tr>
                         </tfoot>
                         <tbody>
                             <tr>
-                                <th>아이디</th>
-                                <td><input type="email" name="email" id="email" maxlength="30" minlength="3"></td>
+                                <th>계좌 비밀번호</th>
+                                <td><input type="password" name="pw1" id="pw1" maxlength="30" minlength="3"></td>
                             </tr>
                             <tr>
-                                <th>비밀번호</th>
-                                <td><input type="password" name="pw" id="pw" maxlength="20" minlength="3"></td>
+                                <th>비밀번호 확인</th>
+                                <td><input type="password" name="pw2" id="pw2" maxlength="20" minlength="3"></td>
+                            </tr>
+                            <tr>
+                                <th>계좌별칭</th>
+                                <td><input type="text" name="name" id="name" maxlength="20" minlength="3"></td>
                             </tr>
                             <tr>
                                 <td id="msg" colspan="2" style="color: red">{{msg}}</td>
@@ -72,9 +76,20 @@ $(document).ready(function(){
 
 
 });
-function login(){
-        document.form1.action="login"
-        document.form1.submit()
+function createaccount(){
+        pw1 = $('#pw1').val()
+        pw2 = $('#pw2').val()
+        if(pw1 == pw2){
+
+            document.form1.action="createaccount"
+            document.form1.submit()
+
+        }else{
+            $('#msg').text('비밀번호가 일치하지 않습니다.')
+        }
+
+
+
     }
 </script>
 </html>

@@ -359,6 +359,21 @@ def selstockwallet(mem_code):
         conn.close()
     return sw
 
+def selcountwallet(mem_code):
+    conn = connections()
+    cursor = conn.cursor()
+    sql_sonum = "select count(*) from stock_wallet where mem_code=:mem_code"
+    try:
+        cursor.execute(sql_sonum, mem_code=mem_code)
+    except Exception as e:
+        print('출력 오류', e)
+    finally:
+        sw = cursor.fetchall()[0][0]
+        cursor.close()
+        conn.close()
+    return sw
+
+
 def selstockname(code):
     conn = connections()
     cursor = conn.cursor()
@@ -373,3 +388,60 @@ def selstockname(code):
         cursor.close()
         conn.close()
     return code
+
+def selac_num(ac_num):
+    conn = connections()
+    cursor = conn.cursor()
+    sql_sonum = "select count(*) from account where ac_num=:ac_num"
+    try:
+        cursor.execute(sql_sonum, ac_num=ac_num)
+    except Exception as e:
+        print('출력 오류', e)
+    finally:
+        count = cursor.fetchall()[0][0]
+        print(count)
+        cursor.close()
+        conn.close()
+    return count
+
+def selac_code(ac_num):
+    conn = connections()
+    cursor = conn.cursor()
+    sql_sonum = "select ac_code from account where ac_num=:ac_num"
+    try:
+        cursor.execute(sql_sonum, ac_num=ac_num)
+    except Exception as e:
+        print('출력 오류', e)
+    finally:
+        code = cursor.fetchall()[0][0]
+
+        cursor.close()
+        conn.close()
+    return code
+
+
+def addaccount(**key):
+    conn= connections()
+    cursor = conn.cursor()
+    sql_addcode = 'insert into account values(account_seq.nextVal,:ac_num,:ac_pwd,0,:ac_name,sysdate,null)'
+    try:
+        cursor.execute(sql_addcode,ac_num=key['ac_num'],ac_pwd=key['ac_pwd'],ac_name=key['ac_name'])
+        conn.commit()
+    except Exception as e:
+        print('입력 오류')
+    finally:
+        cursor.close()
+        conn.close()
+
+def addaccountclient(**key):
+    conn= connections()
+    cursor = conn.cursor()
+    sql_addcode = 'insert into account_client values(:ac_code,:mem_code,6)'
+    try:
+        cursor.execute(sql_addcode,ac_code=key['ac_code'],mem_code=key['mem_code'])
+        conn.commit()
+    except Exception as e:
+        print('입력 오류')
+    finally:
+        cursor.close()
+        conn.close()
