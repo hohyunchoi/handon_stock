@@ -118,7 +118,6 @@ if(page ==""){
 page=1
 }
 playAlert = setInterval(function() {
-    console.log('interval')
    $.ajax({ url:'stockchart_ajax?page='+page+'&sosok='+sosok,
     success:function(data){
         var result = data;
@@ -181,7 +180,7 @@ playAlert = setInterval(function() {
     success:function(data){
         var result = data
         var pages = result.replace(/&lt;/gi,'<').replace(/&gt;/gi, '>').replace(/&quot;/gi, '\"').replace(/&amp;/gi,"&")
-        console.log(typeof(pages))
+
         $('#paging').html(pages)
         }
         })

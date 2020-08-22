@@ -142,7 +142,6 @@ def stockchart(request):
 def stockchartajax(request):
     page = request.GET['page']
     sosok = request.GET['sosok']
-    print(sosok)
     stockchart = getNaverStockData(page=page, sosok=sosok).to_html(index=False)
     return render(request, "stockchartserver.html", {"stockchart": stockchart})
 
@@ -217,7 +216,6 @@ def stockdetail(request):
             sosok = 'KOSDAQ'
         else:
             sosok = 'KOSPI'
-        print('code?=',code)
     request.session['name'] = name
 
     """df = pd.read_html('http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=13', header=0)[0]
@@ -328,7 +326,6 @@ def gethogatable(request, code):
         hogamax.append(hoga2)
     hogatable = '<table class="hoga"><thead><tr><td>매도잔량</td><td>호가</td><td>매수잔량</td></tr><thead><tfoot><tr><td>' + tdown + '</td><td>잔량합계<br><span>' + dealay + '</span></td><td>' + tup + '</td></tr></tfoot><tbody>'
     for i in range(5, 10):
-        print(hogamax[i - 5])
         hoga1 = soup.select('#tab_con2 > table .f_down td:nth-child(1)')[i].text
         hoga2 = soup.select('#tab_con2 > table .f_down td:nth-child(2)')[i].text
         hogatable += '<tr class="f_down"><td><div class="grp"><div style="width:' + str(
@@ -437,7 +434,7 @@ def buyorder(requset):
                         models.addstock(code=code,mem_code=mem_code,stock=sellstock[0][1],price=sellstock[0][1]*price)
                     sw_ju = models.selwalletstock(mem_code=sellstock[0][3],code=code)[0][0]
                     if (sw_ju - stock) == 0:
-                        models.delwalletstock(code=code)
+                        models.delwalletstock(code=code,mem_code=sellstock[0][3])
                     else:
                         models.upwalletstock(code=code,mem_code=sellstock[0][3],stock=sellstock[0][1])
                     models.accountout(price=sellstock[0][1] * price, mem_code=mem_code)
@@ -484,7 +481,9 @@ def buyorder(requset):
                     stock=0
     else:
         return render(requset,"orderserver.html",{"msg":"잔고를 확인해 주세요."})
-    msg = str(stocktoast1)+msg1
+    msg = ''
+    if stocktoast1 != 0:
+        msg += str(stocktoast1)+msg1
     if msg2 != '':
         msg += "\n"+str(stocktoast2)+msg2
 
@@ -498,6 +497,8 @@ def sellorder(request):
     price = int(request.POST['price'])
     code = request.POST['code']
     buyprice = int(request.POST['buyprice'])
+    print('buyprice?',buyprice)
+    print('price?', price)
     mem_code = request.session['user'][0]
     so_num = models.selectso_num()
     print(models.selwalletstock(mem_code=mem_code,code=code))
@@ -522,7 +523,7 @@ def sellorder(request):
             if buystock == []:
                 print('구매주문 없음 호가랑 비교')
                 # 판매가격이  호가사는 가격보다 낮다면
-                if price < buyprice:
+                if price <= buyprice:
                     print('호가로 거래 바로 실행!')
                     #판매로그 남기기
                     print('판매로그')
@@ -601,10 +602,14 @@ def sellorder(request):
                     msg1 = '주 판매 완료.'
                     stocktoast1 += stock
                     stock = 0
+        if models.selwalletstock(mem_code=mem_code,code=code)[0][0] == 0:
+            models.delwalletstock(code=code,mem_code=mem_code)
+
     else:
         return render(request,"orderserver.html",{"msg":"거래 가능 주식 수가 부족합니다."})
-
-    msg = str(stocktoast1)+msg1
+    msg = ''
+    if stocktoast1 != 0:
+        msg += str(stocktoast1)+msg1
     if msg2 != '':
         msg += "\n"+str(stocktoast2)+msg2
     return render(request, "orderserver.html",{"msg":msg})
@@ -689,9 +694,9 @@ def stockwallet(request):
 
 def stockwallet_ajax(request):
     mem_code = request.session['user'][0]
-    print(mem_code)
+
     stockwallet = models.selstockwallet(mem_code)
-    print(stockwallet)
+
     sw = []
     realprice = 0
     buyprice = 0
@@ -751,5 +756,4 @@ def stockwallet_ajax(request):
         sw.append(stock)
 
     sw = json.dumps(sw)
-    print(sw)
     return  render(request,"stockwalletserver.html",{"sw":sw})

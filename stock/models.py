@@ -291,9 +291,9 @@ def selwalletstock(**key):
 def delwalletstock(**key):
     conn = connections()
     cursor = conn.cursor()
-    sql_addlog = 'delete stock_wallet where code = :code'
+    sql_addlog = 'delete stock_wallet where code = :code and mem_code=:mem_code'
     try:
-        cursor.execute(sql_addlog, code=key['code'])
+        cursor.execute(sql_addlog, code=key['code'],mem_code=key['mem_code'])
         conn.commit()
     except Exception as e:
         print('입력 오류', e)
